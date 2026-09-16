@@ -1,0 +1,12 @@
+{
+  "cards": [
+    {
+      "id": "01",
+      "by": "wing",
+      "departedAt": "2026-09-16T07:00:00Z",
+      "deliveredAt": "2026-09-17T05:30:00Z",
+      "title": "Post.",
+      "body": "There's a postcard for you. It came by bee."
+    }
+  ]
+}

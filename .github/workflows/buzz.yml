@@ -1,0 +1,33 @@
+# The buzz. Runs every quarter hour and sends the push for any card that has
+# just been delivered. Nothing of ours is running on the phone when post
+# arrives, so the system has to be told — same reason Carnet arranged its
+# notifications in advance.
+name: buzz
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      card:
+        description: 'Card id to send right now, whatever the clock says'
+        required: false
+      text:
+        description: 'Or a one-off message to buzz instead'
+        required: false
+permissions:
+  contents: read
+jobs:
+  buzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save --no-audit --no-fund web-push@3
+      - run: node scripts/buzz.mjs
+        env:
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_SUBS: ${{ secrets.PUSH_SUBS }}
+          CARD: ${{ inputs.card }}
+          TEXT: ${{ inputs.text }}

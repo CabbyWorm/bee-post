@@ -1,0 +1,4 @@
+# The Carnet app is its own repository, kept here for reference only.
+carnet-reference/
+node_modules/
+.DS_Store

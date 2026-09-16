@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bee Post</title>
+<meta name="description" content="Postcards, by bee.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bee Post">
+<meta name="theme-color" content="#F6F1E5">
+<style>
+  :root {
+    --paper: #F6F1E5; --shade: #EAE3D4; --ink: #2E2924; --faded: #6B635A;
+    --bee: #E8B324; --sea: #C9D6D3; --red: #8C3A2B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 18px; line-height: 1.45;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+    background-image: radial-gradient(ellipse at 50% 30%, var(--paper) 55%, var(--shade) 130%);
+    min-height: 100vh;
+  }
+  main { max-width: 520px; margin: 0 auto; }
+  h1 { font-weight: normal; font-size: 30px; line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.01em; }
+  p { margin: 0 0 14px; }
+  .postmark {
+    display: inline-block; border: 2px solid var(--faded); border-radius: 50%;
+    padding: 10px 14px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--faded); transform: rotate(-8deg); margin: 4px 0 10px; line-height: 1.3; text-align: center;
+  }
+  figure { margin: 18px 0; }
+  #map { width: 100%; height: auto; display: block; border: 1px solid var(--shade); background: var(--sea); border-radius: 6px; }
+  .readout { font-size: 15px; color: var(--faded); margin-top: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .said { min-height: 1.5em; font-style: italic; margin-top: 8px; }
+  .bee { cursor: pointer; }
+  .bee .wing { animation: beat .12s linear infinite alternate; transform-origin: center; }
+  @keyframes beat { from { transform: scaleY(.6); } to { transform: scaleY(1); } }
+  section.setup { border-top: 1px solid var(--shade); margin-top: 26px; padding-top: 18px; }
+  h2 { font-weight: normal; font-size: 20px; margin: 0 0 10px; }
+  ol { padding-left: 22px; margin: 0 0 12px; } li { margin-bottom: 6px; }
+  button {
+    font: inherit; font-size: 17px; background: var(--ink); color: var(--paper);
+    border: 0; border-radius: 999px; padding: 12px 22px; cursor: pointer;
+  }
+  button:disabled { opacity: .5; }
+  .hint { font-size: 15px; color: var(--faded); }
+  textarea { width: 100%; font: 12px/1.3 ui-monospace, Menlo, monospace; height: 110px; margin-top: 8px; background: #fff; border: 1px solid var(--shade); border-radius: 6px; padding: 8px; }
+  .hidden { display: none !important; }
+  footer { margin-top: 30px; font-size: 13px; color: var(--faded); }
+</style>
+</head>
+<body>
+<main>
+  <div class="postmark">Manchester<br>16 Sep 2026</div>
+  <h1>Something's on its way.</h1>
+  <p>A bee left Manchester at eight this morning with a postcard in its bag and told nobody. It's over the North Sea now, doing about twenty-two kilometres an hour, and it reckons on Amsterdam Centraal for half past seven tomorrow morning.</p>
+  <p>First post.</p>
+
+  <figure>
+    <svg id="map" viewBox="0 0 600 360" role="img" aria-label="A map of the North Sea with a bee somewhere over it"></svg>
+    <div class="readout"><span id="out">—</span><span id="eta">—</span></div>
+    <div class="said" id="said">Tap the bee if you want a word. It's busy.</div>
+  </figure>
+
+  <section class="setup">
+    <h2>So the post can find you</h2>
+    <div id="step-install">
+      <ol>
+        <li>Tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.</li>
+        <li>Open it from there — the bee can only knock on a door that's on the home screen.</li>
+      </ol>
+      <p class="hint">Not on an iPhone? Skip to the button; it'll appear when it can.</p>
+    </div>
+    <div id="step-buzz" class="hidden">
+      <p>The bee would like to buzz when a card lands. Once is enough.</p>
+      <p><button id="allow">Let it buzz</button></p>
+      <p class="hint" id="allow-hint"></p>
+    </div>
+    <div id="step-send" class="hidden">
+      <p>Done — one last thing. Send this back to whoever gave you the link, so the bee knows which door.</p>
+      <p><button id="share">Send it on</button></p>
+      <textarea id="sub" readonly></textarea>
+      <p class="hint" id="share-hint"></p>
+    </div>
+    <div id="step-ready" class="hidden">
+      <p>All set. Put the phone down. It's got a long way to go yet.</p>
+    </div>
+  </section>
+
+  <footer>Postcards, by bee. Distances are as the bee flies.</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
