@@ -301,6 +301,13 @@
     if (leg.id === 'thu-centraal') line += ` · trams counted: ${Math.floor((state.now - leg.t0) / 80000)}`;
     if (leg.id === 'sat-morning' || leg.id === 'fri-town') line += ` · ferry crossings: ${Math.min(leg.id === 'fri-town' ? 3 : 2, Math.floor((state.now - leg.t0) / (25 * 60000)))}`;
     if (leg.id === 'eurostar' && state.pos.segment === 2) line += ' · fish seen: 0';
+    if (leg.id === 'home') {
+      // The whole week, added up: every leg that went somewhere, and the one it flew itself.
+      const moved = Trip.legs.filter((l) => ['wing', 'plane', 'train', 'eurostar', 'walk'].includes(l.mode));
+      const total = moved.reduce((sum, l) => { const v = l.via.map((k) => Trip.places[k]); let d = 0; for (let i = 0; i < v.length - 1; i++) d += Trip.haversine(v[i], v[i + 1]); return sum + d; }, 0);
+      const own = Trip.haversine(Trip.places.manchester, Trip.places.centraal);
+      line = `Home · ${Math.round(total).toLocaleString('en-GB')} km this week, ${Math.round(own)} of them on its own wings`;
+    }
     $('said').textContent = line;
     const where = sheet !== 'sea' ? (near ? near.name : 'Amsterdam') : (near ? near.name : 'the North Sea');
     $('where').textContent = `${where.toUpperCase()} · ${Math.round(state.fromHome)} KM FROM MANCHESTER`;
