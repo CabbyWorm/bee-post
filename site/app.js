@@ -138,6 +138,15 @@
         const dash = leg.mode === 'wing' ? '2 5' : leg.mode === 'plane' ? '6 5' : leg.mode === 'sleep' || leg.mode === 'wait' ? '1 6' : '5 3';
         el('path', { d: 'M' + pts.join('L'), fill: 'none', stroke: '#6B635A', 'stroke-width': 1.3, 'stroke-dasharray': dash }, layers.route);
       }
+      if (sheet === 'sea' && (leg.mode === 'eurostar' || leg.mode === 'train') && leg.via.length > 2) {
+        for (const k of leg.via.slice(1, -1)) {
+          const p = Trip.places[k], [x, y] = proj(p);
+          if (k === 'midChannel') continue;
+          el('circle', { cx: x, cy: y, r: 2, fill: '#6B635A' }, layers.route);
+          const t = el('text', { x: x + 4, y: y - 4, 'font-size': 9, fill: '#6B635A', 'font-family': 'inherit' }, layers.route);
+          t.textContent = p.name.replace('London ', '');
+        }
+      }
       // Under the sea: a second line, so the tunnel shows.
       if (leg.id === 'eurostar') {
         const a = proj(Trip.places.folkestone), b = proj(Trip.places.calais);
@@ -286,6 +295,9 @@
       const done = Math.round(total * state.f);
       line += ` · ${done} km done · ${Math.max(0, Math.round(total - done))} to go`;
     }
+    if (leg.id === 'thu-centraal') line += ` · trams counted: ${Math.floor((state.now - leg.t0) / 80000)}`;
+    if (leg.id === 'sat-morning' || leg.id === 'fri-town') line += ` · ferry crossings: ${Math.min(leg.id === 'fri-town' ? 3 : 2, Math.floor((state.now - leg.t0) / (25 * 60000)))}`;
+    if (leg.id === 'eurostar' && state.pos.segment === 2) line += ' · fish seen: 0';
     $('said').textContent = line;
     const where = sheet !== 'sea' ? (near ? near.name : 'Amsterdam') : (near ? near.name : 'the North Sea');
     $('where').textContent = `${where.toUpperCase()} · ${Math.round(state.fromHome)} KM FROM MANCHESTER`;
@@ -302,7 +314,8 @@
       if (thumbs[card.id]) continue;
       const c = document.createElement('canvas'); c.width = 168 * 2; c.height = 120 * 2;
       Postcard.drawFront(c.getContext('2d'), c.width, c.height, { ...card, ...Voice.cards[card.id] }, cardLook(card));
-      const when = h('div', { class: 'when typed' }, `${Trip.fmtDay(card.t)} ${Trip.fmtTime(card.t)}`);
+      const how = { 'wing-out': 'own wings', kl1036: 'KL1036', 'thu-sleep': 'under the door', eurostar: 'under the sea', 'sat-deliver': 'by hand', 'sat-gate': 'from the bag' }[card.by] || '';
+      const when = h('div', { class: 'when typed' }, `${Trip.fmtDay(card.t).slice(0, 3)} ${Trip.fmtTime(card.t)}${how ? ' · ' + how : ''}`);
       const t = h('div', { class: 'thumb', onclick: () => openCard(card.id) }, c, when);
       if (!store.get('seen', []).includes(card.id)) t.classList.add('unread');
       list.prepend(t);
@@ -317,7 +330,8 @@
     }
     const stage = Trip.royalMail.stages.filter((s) => now() >= s.at).pop();
     thumbs.royal.textContent = stage ? stage.where : 'Not posted yet';
-    $('nothing').textContent = state.delivered.length ? '' : 'Nothing on the mat yet. It\'s on its way.';
+    const more = Trip.cards.some((c) => c.t > now());
+    $('nothing').textContent = !state.delivered.length ? 'Nothing on the mat yet. It\'s on its way.' : more ? 'There\'s more coming. Not saying when.' : 'That\'s the lot.';
   }
 
   // MARK: - A card, opened
