@@ -8,8 +8,17 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    caches.keys().then((keys) => {
+      const stale = keys.filter((k) => k !== CACHE);
+      return Promise.all(stale.map((k) => caches.delete(k))).then(() => self.clients.claim()).then(async () => {
+        // A page still showing the old shell is brought up to date now rather
+        // than on its next open: a phone that installed the placeholder should
+        // find the post, not the placeholder.
+        if (!stale.length) return;
+        const list = await self.clients.matchAll({ type: 'window' });
+        for (const c of list) { try { await c.navigate(c.url); } catch {} }
+      });
+    })
   );
 });
 

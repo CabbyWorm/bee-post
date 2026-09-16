@@ -340,6 +340,30 @@ const Voice = (() => {
     "Foucault's pendulum in Paris swung all day proving the earth turns. The ferry here goes back and forth all day proving nothing, and it's free, and I prefer it.",
   ];
 
+  /// Time of day, because a bee is a morning creature and takes it personally.
+  const hours = {
+    morning: [
+      "Up. Come on, up. The bakeries have had a head start on us.",
+      "Best part of the day, this, and I'd bet you're asleep through it.",
+      "Market's on now and it'll be packing up by lunch. Not saying rush. Saying rush.",
+    ],
+    afternoon: [
+      "It's stroopwafel o'clock. Been stroopwafel o'clock for a while, if I'm honest.",
+      "Afternoon's plan: something with syrup in it, and then a sit down.",
+      "Everybody's on a bike. Everybody. Mind yourself crossing anything.",
+    ],
+    evening: [
+      "Light's going. Canals go all bronze about now. Have a look, go on.",
+      "Everyone's back out again. Whole cities do that, I've noticed. Twice a day.",
+      "Cafés have put the lights on. I'm choosing to take that personally.",
+    ],
+    night: [
+      "Late, and I'm still up. Bees don't usually do this. Having a lovely time of it.",
+      "Everything's shut. Been round twice checking.",
+      "Flying at night's a terrible idea for a bee. I've done it once this week. Once was plenty.",
+    ],
+  };
+
   const facts = [
     "Bees can't fly in the rain properly. Which is why I'm from Manchester and have never been anywhere. Until this month.",
     "A bee flies about twenty-two kilometres an hour with a following wind. I've now got the following wind to prove it.",
@@ -362,6 +386,6 @@ const Voice = (() => {
       .replace(/\{wind\}/g, ctx.wind || 'wherever it likes');
   }
 
-  return { cards, royalMail, legs, general, remembering, facts, fill };
+  return { cards, royalMail, legs, general, remembering, hours, facts, fill };
 })();
 if (typeof module !== 'undefined') module.exports = Voice;

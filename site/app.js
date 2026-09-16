@@ -188,7 +188,10 @@
     if (!decks[key]) {
       const day = new Date(state.now).toISOString().slice(0, 10);
       const own = Voice.legs[key] || [];
-      const rest = shuffle([...shuffle(Voice.general, key + day).slice(0, 2), ...shuffle(Voice.remembering, key + day + 'r').slice(0, state.leg.mode === 'wander' || state.leg.mode === 'sleep' ? 2 : 1), ...shuffle(Voice.facts, key + day + 'f').slice(0, 1)], key + day + 'x');
+      const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Amsterdam' }).format(new Date(state.now)));
+      const slot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : hour < 23 ? 'evening' : 'night';
+      const hourLine = state.leg.mode === 'sleep' || state.leg.mode === 'wing' || state.leg.mode === 'plane' ? [] : shuffle(Voice.hours[slot], key + day + 'h').slice(0, 1);
+      const rest = shuffle([...shuffle(Voice.general, key + day).slice(0, 2), ...shuffle(Voice.remembering, key + day + 'r').slice(0, state.leg.mode === 'wander' || state.leg.mode === 'sleep' ? 2 : 1), ...shuffle(Voice.facts, key + day + 'f').slice(0, 1), ...hourLine], key + day + 'x');
       // The leg's own first line stays first: opening the page on a new leg tells you the bee has noticed.
       decks[key] = { lines: [own[0], ...shuffle([...own.slice(1), ...rest], key + day + 'o')].filter(Boolean), i: 0 };
     }
