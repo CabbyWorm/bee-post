@@ -311,5 +311,5 @@ const Postcard = (() => {
     if (opts.signed) drawPostmark(ctx, w * 0.64, h * 0.66, w * 0.22, opts.town || 'AMSTERDAM', opts.delivered || '', 'sg' + card.id, 0.18, blue);
   }
 
-  return { drawPaper, drawFront, drawStamp, drawPostmark, drawCorner, HAND, TYPED };
+  return { drawPaper, drawFront, drawStamp, drawPostmark, drawCorner, scenes, HAND, TYPED };
 })();

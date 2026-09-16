@@ -31,13 +31,13 @@
   const W = 600, H = 360;
   const SHEETS = {
     sea: { lonMin: -4.6, lonMax: 7.4, latMin: 50.3, latMax: 55.1 },
-    city: { lonMin: 4.70, lonMax: 4.99, latMin: 52.285, latMax: 52.425 },
+    region: { lonMin: 4.70, lonMax: 4.99, latMin: 52.285, latMax: 52.425 },
+    city: { lonMin: 4.845, lonMax: 4.954, latMin: 52.352, latMax: 52.392 },
   };
-  const CITY = new Set(['centraal', 'ijFerry', 'vondelpark', 'beeHotel', 'bloemenmarkt', 'hotelDoor', 'schiphol', 'gate']);
+  const CITY = new Set(['centraal', 'ijFerry', 'vondelpark', 'beeHotel', 'bloemenmarkt', 'hotelDoor']);
+  const REGION = new Set([...CITY, 'schiphol', 'gate']);
   let sheet = 'sea';
   const proj = (p, s = SHEETS[sheet]) => {
-    // Equirectangular, with the longitude squeezed for the latitude so the
-    // sheet is not stretched; the sheet's own aspect takes care of the rest.
     const kx = W / (s.lonMax - s.lonMin), ky = H / (s.latMax - s.latMin);
     return [((p.lon - s.lonMin) * kx), ((s.latMax - p.lat) * ky)];
   };
@@ -51,8 +51,45 @@
     drawSheet();
   }
 
+  function label(key, anchor, text) {
+    const [x, y] = proj(Trip.places[key]);
+    el('circle', { cx: x, cy: y, r: 3, fill: '#2E2924' }, layers.places);
+    const t = el('text', { x: x + (anchor === 'end' ? -7 : 7), y: y + 4, 'font-size': 12, 'text-anchor': anchor, fill: '#2E2924', 'font-family': 'inherit' }, layers.places);
+    t.textContent = text;
+  }
+
+  /// Amsterdam, sketched: the IJ across the top, the canal ring, the Amstel.
+  function drawAmsterdam(s) {
+    el('rect', { x: 0, y: 0, width: W, height: H, fill: '#F6F1E5' }, layers.land);
+    const bank = [[4.70, 52.407], [4.78, 52.402], [4.845, 52.392], [4.86, 52.388], [4.89, 52.383], [4.905, 52.3815], [4.94, 52.380], [4.99, 52.386]];
+    const far = [[4.99, 52.402], [4.94, 52.398], [4.905, 52.397], [4.89, 52.400], [4.86, 52.404], [4.845, 52.408], [4.78, 52.418], [4.70, 52.422]];
+    const ij = bank.map(([lon, lat]) => proj({ lat, lon }).join(',')), ijb = far.map(([lon, lat]) => proj({ lat, lon }).join(','));
+    el('path', { d: 'M' + ij.join('L') + 'L' + ijb.join('L') + 'Z', fill: '#C9D6D3', stroke: '#6B635A', 'stroke-width': 1 }, layers.water);
+    const [cx, cy] = proj(Trip.places.centraal);
+    const kmY = H / ((s.latMax - s.latMin) * 111);
+    const kmX = W / ((s.lonMax - s.lonMin) * 111 * Math.cos(52.37 * Math.PI / 180));
+    const wide = sheet === 'city';
+    for (const rkm of [0.55, 0.75, 0.93, 1.1]) {
+      const rx = rkm * kmX, ry = rkm * kmY;
+      el('path', { d: `M${cx - rx},${cy + ry * 0.12} A${rx},${ry} 0 0 0 ${cx + rx},${cy + ry * 0.12}`, fill: 'none', stroke: '#9DB3B4', 'stroke-width': wide ? 4 : 2.2 }, layers.water);
+    }
+    // The Singel is nearest; the ring's spokes, a few of them.
+    if (wide) {
+      for (const a of [-155, -125, -95, -65, -35]) {
+        const r0 = 0.55, r1 = 1.1, th = a * Math.PI / 180;
+        el('path', { d: `M${cx + Math.cos(th) * r0 * kmX},${cy + ry(r0) - Math.sin(th) * r0 * kmY} L${cx + Math.cos(th) * r1 * kmX},${cy + ry(r1) - Math.sin(th) * r1 * kmY}`, fill: 'none', stroke: '#9DB3B4', 'stroke-width': 2.5 }, layers.water);
+      }
+      function ry(r) { return r * kmY * 0.12; }
+    }
+    const amstel = [[4.9005, 52.3665], [4.902, 52.358], [4.906, 52.345], [4.905, 52.33], [4.91, 52.30]].map(([lon, lat]) => proj({ lat, lon }).join(','));
+    el('path', { d: 'M' + amstel.join('L'), fill: 'none', stroke: '#9DB3B4', 'stroke-width': wide ? 4 : 2.4, 'stroke-linecap': 'round' }, layers.water);
+    // The Vondelpark, which is the bee's kind of place.
+    const [vx, vy] = proj(Trip.places.vondelpark);
+    el('ellipse', { cx: vx, cy: vy, rx: 0.75 * kmX, ry: 0.2 * kmY, fill: '#D5DCC4', stroke: '#9DAA88', 'stroke-width': 1, transform: `rotate(-20 ${vx} ${vy})` }, layers.water);
+  }
+
   function drawSheet() {
-    for (const g of Object.values(layers)) while (g.firstChild) g.removeChild(g.firstChild);
+    for (const g of Object.values(layers)) if (g.firstChild !== undefined) while (g.firstChild) g.removeChild(g.firstChild);
     if (sheet === 'sea') {
       const land = el('g', { fill: '#F6F1E5', stroke: '#6B635A', 'stroke-width': 1.2, 'stroke-linejoin': 'round' }, layers.land);
       if (outlines) {
@@ -60,35 +97,14 @@
         const c = outlines.continent.map(([lon, lat]) => proj({ lat, lon }).join(','));
         el('path', { d: 'M' + c.join('L') + `L${W},${H}L${c[0].split(',')[0]},${H}Z` }, land);
       }
-      for (const [key, anchor] of [['manchester', 'end'], ['centraal', 'start'], ['stPancras', 'end']]) {
-        const p = Trip.places[key], [x, y] = proj(p);
-        el('circle', { cx: x, cy: y, r: 3.2, fill: '#2E2924' }, layers.places);
-        const t = el('text', { x: x + (anchor === 'end' ? -7 : 7), y: y + 4, 'font-size': 12, 'text-anchor': anchor, fill: '#2E2924', 'font-family': 'inherit' }, layers.places);
-        t.textContent = key === 'centraal' ? 'Amsterdam' : key === 'stPancras' ? 'London' : p.name;
-      }
+      label('manchester', 'end', 'Manchester'); label('centraal', 'start', 'Amsterdam'); label('stPancras', 'end', 'London');
+    } else if (sheet === 'region') {
+      drawAmsterdam(SHEETS.region);
+      label('centraal', 'start', 'Centraal'); label('schiphol', 'start', 'Schiphol'); label('vondelpark', 'end', 'Vondelpark');
     } else {
-      // Amsterdam, sketched: the IJ across the top, the canal ring, the Amstel,
-      // and the places the bee goes. Land is paper; water is the sea colour.
-      el('rect', { x: 0, y: 0, width: W, height: H, fill: '#F6F1E5' }, layers.land);
-      const ij = [[4.70, 52.407], [4.78, 52.402], [4.86, 52.395], [4.90, 52.386], [4.94, 52.383], [4.99, 52.386]].map(([lon, lat]) => proj({ lat, lon }).join(','));
-      const ijBack = [[4.99, 52.402], [4.94, 52.400], [4.90, 52.400], [4.86, 52.410], [4.78, 52.418], [4.70, 52.422]].map(([lon, lat]) => proj({ lat, lon }).join(','));
-      el('path', { d: 'M' + ij.join('L') + 'L' + ijBack.join('L') + 'Z', fill: '#C9D6D3', stroke: '#6B635A', 'stroke-width': 1 }, layers.water);
-      const [cx, cy] = proj(Trip.places.centraal);
-      const kmY = H / ((SHEETS.city.latMax - SHEETS.city.latMin) * 111);
-      const kmX = W / ((SHEETS.city.lonMax - SHEETS.city.lonMin) * 111 * Math.cos(52.37 * Math.PI / 180));
-      for (const rkm of [0.55, 0.75, 0.93, 1.1]) {
-        const rx = rkm * kmX, ry = rkm * kmY;
-        el('path', { d: `M${cx - rx},${cy + ry * 0.15} A${rx},${ry} 0 0 0 ${cx + rx},${cy + ry * 0.15}`, fill: 'none', stroke: '#8FA8AA', 'stroke-width': 2.2 }, layers.water);
-      }
-      // The Amstel, wandering off south.
-      const amstel = [[4.9005, 52.368], [4.902, 52.358], [4.906, 52.345], [4.905, 52.33], [4.91, 52.30]].map(([lon, lat]) => proj({ lat, lon }).join(','));
-      el('path', { d: 'M' + amstel.join('L'), fill: 'none', stroke: '#8FA8AA', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, layers.water);
-      for (const [key, anchor, label] of [['centraal', 'start', 'Centraal'], ['ijFerry', 'start', 'the ferry'], ['vondelpark', 'end', 'Vondelpark'], ['bloemenmarkt', 'start', 'Bloemenmarkt'], ['schiphol', 'start', 'Schiphol'], ['hotelDoor', 'start', 'your door']]) {
-        const [x, y] = proj(Trip.places[key]);
-        el('circle', { cx: x, cy: y, r: 3, fill: '#2E2924' }, layers.places);
-        const t = el('text', { x: x + (anchor === 'end' ? -7 : 7), y: y + 4, 'font-size': 12, 'text-anchor': anchor, fill: '#2E2924', 'font-family': 'inherit' }, layers.places);
-        t.textContent = label;
-      }
+      drawAmsterdam(SHEETS.city);
+      label('centraal', 'start', 'Centraal'); label('ijFerry', 'start', 'the ferry'); label('hotelDoor', 'start', 'your door');
+      label('bloemenmarkt', 'start', 'Bloemenmarkt'); label('vondelpark', 'end', 'Vondelpark'); label('beeHotel', 'end', 'bee hotel');
     }
     // The bee marker is a small rendering of the bee itself.
     layers.beeImg = el('image', { width: 46, height: 50, x: -23, y: -25 }, layers.bee);
@@ -109,7 +125,7 @@
   let lastRouteLeg = null;
   function updateMap(state) {
     const leg = state.leg;
-    const wantSheet = leg.via.every((k) => CITY.has(k)) ? 'city' : 'sea';
+    const wantSheet = leg.via.every((k) => CITY.has(k)) ? 'city' : leg.via.every((k) => REGION.has(k)) ? 'region' : 'sea';
     if (wantSheet !== sheet) { sheet = wantSheet; drawSheet(); lastRouteLeg = null; }
     if (lastRouteLeg !== leg.id) {
       while (layers.route.firstChild) layers.route.removeChild(layers.route.firstChild);
@@ -138,7 +154,20 @@
 
   let talking = false, talkTimer = 0;
   let current = null;
-  Bee.animate($('bee'), () => current ? { look: current.look, mood: current.mood, talking } : {});
+  Bee.animate($('bee'), () => current ? { look: current.look, mood: current.mood, talking, asleep: current.leg.mode === 'sleep' && !talking } : {});
+  let bagDrawn = false;
+  function showCreature(state) {
+    const inBag = !!(state.leg.mode === 'bag' || state.leg.inTheBag);
+    $('bee').classList.toggle('hidden', inBag);
+    $('bag').classList.toggle('hidden', !inBag);
+    $('zzz').classList.toggle('hidden', state.leg.mode !== 'sleep');
+    if (inBag && !bagDrawn) {
+      const c = $('bag'), d = dpr(); c.width = 268 * d; c.height = 200 * d;
+      const ctx = c.getContext('2d'); ctx.scale(d, d);
+      Postcard.scenes.bag(ctx, 268, 200);
+      bagDrawn = true;
+    }
+  }
 
   // A deck per leg: its own lines, then a few general ones, in an order that
   // stays put for the day, so tapping walks a sequence rather than reshuffling.
@@ -164,7 +193,7 @@
     talkTimer = setTimeout(() => { talking = false; }, Math.min(3200, 900 + text.length * 28));
   }
   function context(state) {
-    const near = Trip.nearest(state.pos, sheet === 'city' ? 3 : 60);
+    const near = Trip.nearest(state.pos, sheet === 'sea' ? 60 : 3);
     return { fromHome: state.fromHome, where: near ? near.name : (state.leg.mode === 'wing' || state.leg.mode === 'plane' ? 'the North Sea' : 'here') };
   }
   function sayTheNextThing() {
@@ -187,7 +216,7 @@
     const sameDay = dayOf(leg.t0) === dayOf(leg.t1);
     $('from').textContent = `${Trip.places[leg.from].name} · ${dayOf(leg.t0)} ${Trip.fmtTime(leg.t0)}`;
     $('to').textContent = leg.id === 'home' ? 'for good' : `${Trip.places[leg.to].name} · ${sameDay ? '' : dayOf(leg.t1) + ' '}${Trip.fmtTime(leg.t1)}`;
-    const near = Trip.nearest(state.pos, sheet === 'city' ? 3 : 60);
+    const near = Trip.nearest(state.pos, sheet === 'sea' ? 60 : 3);
     const total = Trip.haversine(Trip.places[leg.from], Trip.places[leg.to]);
     let line = !near ? 'Over the North Sea' : near.key === 'midChannel' ? 'Under the Channel' : near.name.startsWith('the middle') ? 'In ' + near.name : `Near ${near.name}`;
     if (leg.mode === 'wing' || leg.mode === 'plane' || leg.mode === 'eurostar' || leg.mode === 'train') {
@@ -195,7 +224,7 @@
       line += ` · ${done} km done · ${Math.max(0, Math.round(total - done))} to go`;
     }
     $('said').textContent = line;
-    const where = sheet === 'city' ? (near ? near.name : 'Amsterdam') : (near ? near.name : 'the North Sea');
+    const where = sheet !== 'sea' ? (near ? near.name : 'Amsterdam') : (near ? near.name : 'the North Sea');
     $('where').textContent = `${where.toUpperCase()} · ${Math.round(state.fromHome)} KM FROM MANCHESTER`;
     $('clock').textContent = `${Trip.fmtDay(state.now)} ${Trip.fmtTime(state.now)}`;
   }
@@ -321,6 +350,7 @@
   function tick() {
     const state = Trip.state(now());
     current = state;
+    showCreature(state);
     updateMap(state);
     updateTracker(state);
     if (state.delivered.length !== lastCount) { lastCount = state.delivered.length; updateShelf(state); }

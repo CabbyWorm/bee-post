@@ -90,6 +90,7 @@ const Bee = (() => {
     const phase = opts.phase ?? 0;
     const mood = MOODS[opts.mood] || MOODS.cheerful;
     const talking = !!opts.talking;
+    const asleep = !!opts.asleep;
     const look = { souvenir: opts.look?.souvenir || null, plumpness: clamp01(opts.look?.plumpness), weariness: clamp01(opts.look?.weariness), tan: clamp01(opts.look?.tan) };
     const unit = Math.min(w / PADDED.w, h / PADDED.h);
     const sk = skin(look.tan);
@@ -120,7 +121,7 @@ const Bee = (() => {
     drawLegs(ctx, phase, look);
     drawAbdomen(ctx, unit, look, sk);
     drawWings(ctx, unit, phase, beat, false);
-    drawHead(ctx, unit, phase, mood === MOODS.sleepy, talking, look, sk);
+    drawHead(ctx, unit, phase, mood === MOODS.sleepy, talking, look, sk, asleep);
 
     ctx.restore();
   }
@@ -194,7 +195,7 @@ const Bee = (() => {
     }
   }
 
-  function drawHead(ctx, unit, phase, sleepy, talking, look, sk) {
+  function drawHead(ctx, unit, phase, sleepy, talking, look, sk, asleep = false) {
     const hatted = ON_THE_CROWN.has(look.souvenir);
     if (!hatted) drawAntennae(ctx, phase, -16);
     drawBehind(ctx, look.souvenir);
@@ -210,9 +211,10 @@ const Bee = (() => {
     // Blink: mostly open, shut briefly, out of step with the wings.
     const cycle = (phase * 0.29) % 1;
     const shut = (sleepy ? 0.10 : 0.035) + look.weariness * 0.06;
-    const blinking = cycle < shut;
+    // Asleep, the eyes stay shut and there is no lid to draw over them.
+    const blinking = asleep || cycle < shut;
     // Eyelids at half mast, taken off the top of the eye only.
-    const lid = look.weariness * 5;
+    const lid = asleep ? 0 : look.weariness * 5;
 
     for (const ex of [-26, -13]) {
       if (blinking) {

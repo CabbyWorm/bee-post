@@ -58,6 +58,8 @@
   @keyframes say { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
   #bee { width: 268px; height: 296px; display: block; cursor: pointer; }
   .where { margin-top: 2px; text-align: center; }
+  .zzz { font-family: var(--hand); font-size: 22px; color: var(--faded); margin-top: -40px; margin-left: 150px; animation: drift 3s ease-in-out infinite; }
+  @keyframes drift { 0% { opacity: .2; transform: translateY(6px); } 50% { opacity: 1; } 100% { opacity: .2; transform: translateY(-8px); } }
 
   /* The tracker. */
   .tracker { margin: 14px 0 8px; }
@@ -131,6 +133,8 @@
   <section class="creature">
     <div class="bubble" id="bubble">…</div>
     <canvas id="bee" aria-live="polite"></canvas>
+    <canvas id="bag" class="hidden" width="268" height="200" style="width:268px;height:200px;margin:48px 0" aria-label="A bag, zipped, with two antennae poking out of it"></canvas>
+    <div id="zzz" class="hidden zzz">z z z</div>
     <div class="where typed" id="where"></div>
   </section>
 
