@@ -388,7 +388,7 @@
     $('address').replaceChildren(h('i', {}, 'To you'), h('i', {}, 'c/o a canal'), h('i', {}, card.where === 'gate' ? 'Schiphol, gate D' : 'Amsterdam'), h('i', {}, 'Abroad'));
     drawCorner(card);
     $('overlay').classList.remove('hidden');
-    say(['Go on. Turn it over.', 'Other side.', 'Read the back. I wrote it small so it would fit.', 'That one took some getting here.'][Number(id) % 4]);
+    say(['That one took some getting here.', 'Go on. Turn it over.', 'Other side.', 'Read the back. I wrote it small so it would fit.'][Number(id) % 4]);
   }
   function drawCorner(card) {
     const cc = $('cornercanvas'), box = $('corner');
