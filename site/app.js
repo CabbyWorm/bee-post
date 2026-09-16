@@ -330,6 +330,7 @@
     }
     const stage = Trip.royalMail.stages.filter((s) => now() >= s.at).pop();
     thumbs.royal.textContent = stage ? stage.where : 'Not posted yet';
+    $('keep').classList.toggle('hidden', !state.delivered.length);
     const more = Trip.cards.some((c) => c.t > now());
     $('nothing').textContent = !state.delivered.length ? 'Nothing on the mat yet. It\'s on its way.' : more ? 'There\'s more coming. Not saying when.' : 'That\'s the lot.';
   }
@@ -421,6 +422,40 @@
   });
   $('close').addEventListener('click', () => { $('overlay').classList.add('hidden'); openId = null; if (location.hash) history.replaceState(null, '', location.pathname + location.search); });
   $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('close').click(); });
+
+  // MARK: - Keeping them
+
+  async function keepThem() {
+    const state = Trip.state(now());
+    if (!state.delivered.length) return;
+    const btn = $('keep'); btn.disabled = true; btn.textContent = 'Drawing…';
+    say('Hang on. Doing them all out neat.');
+    await new Promise((r) => setTimeout(r, 50));
+    try {
+      const answers = store.get('answers', {}), signed = store.get('signed', {});
+      const items = state.delivered.map((card) => {
+        const posted = Trip.legs.find((l) => l.id === card.by);
+        return { card, voice: Voice.cards[card.id], look: cardLook(card), opts: {
+          answers, posted: fmtPostDate(posted ? posted.t0 : card.t), postedTown: ['01', '02', '04'].includes(card.id) ? 'MANCHESTER' : 'AMSTERDAM',
+          signed: signed[card.id] ? fmtPostDate(signed[card.id]) : null,
+          when: `${Trip.fmtDay(card.t)} ${Trip.fmtTime(card.t)}`.toUpperCase(),
+        } };
+      });
+      const c = Postcard.memento(items, 'Amsterdam, September 2026');
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+      const file = new File([blob], 'bee-post.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Bee Post' });
+      } else {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'bee-post.png'; a.click();
+      }
+      say('There. All of them. Keep them somewhere dry.');
+    } catch (e) {
+      if (!(e && e.name === 'AbortError')) say('Hm. That didn\'t work. Try again in a minute.');
+    }
+    btn.disabled = false; btn.textContent = 'Keep them';
+  }
+  $('keep').addEventListener('click', keepThem);
 
   // MARK: - The clock
 

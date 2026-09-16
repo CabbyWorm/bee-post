@@ -311,5 +311,97 @@ const Postcard = (() => {
     if (opts.signed) drawPostmark(ctx, w * 0.64, h * 0.66, w * 0.22, opts.town || 'AMSTERDAM', opts.delivered || '', 'sg' + card.id, 0.18, blue);
   }
 
-  return { drawPaper, drawFront, drawStamp, drawPostmark, drawCorner, scenes, HAND, TYPED };
+
+  // MARK: - The back, drawn (for the keepsake)
+
+  /// Word-wraps `text` to `maxWidth` in the current font.
+  function wrap(ctx, text, maxWidth) {
+    const words = text.split(' '), lines = []; let line = '';
+    for (const w of words) {
+      const trial = line ? line + ' ' + w : w;
+      if (ctx.measureText(trial).width > maxWidth && line) { lines.push(line); line = w; } else line = trial;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  /// The whole back on one canvas: message, P.S., the question and what was
+  /// tapped, address, stamp and postmarks. The hand shrinks until it fits.
+  function drawBack(ctx, w, h, card, voice, opts = {}) {
+    drawPaper(ctx, w, h, 'back' + card.id);
+    ctx.strokeStyle = 'rgba(107,99,90,0.45)'; ctx.lineWidth = Math.max(1, w * 0.002);
+    ctx.beginPath(); ctx.moveTo(w * 0.55, h * 0.09); ctx.lineTo(w * 0.55, h * 0.91); ctx.stroke();
+
+    // Everything it says, as paragraphs with a colour each.
+    const paras = voice.text.map((t) => ({ t, colour: ink }));
+    if (voice.ps) paras.push({ t: 'P.S. ' + voice.ps, colour: blue });
+    for (const [prevId, byAnswer] of Object.entries(voice.reactions || {})) {
+      const a = opts.answers?.[prevId]; if (a && byAnswer[a]) paras.push({ t: byAnswer[a], colour: blue });
+    }
+    if (voice.question) {
+      paras.push({ t: voice.question.ask, colour: ink });
+      const a = opts.answers?.[card.id];
+      const label = voice.question.answers.find((x) => x.key === a)?.label;
+      paras.push({ t: label ? `— ${label}` : '— (no answer)', colour: label ? blue : faded });
+    }
+    const colX = w * 0.05, colW = w * 0.47, top = h * 0.07, bottom = h * 0.93;
+    let size = h * 0.055, lines;
+    for (;;) {
+      ctx.font = `${Math.round(size)}px ${HAND}`;
+      lines = [];
+      for (const p of paras) { for (const l of wrap(ctx, p.t, colW)) lines.push({ l, colour: p.colour }); lines.push({ l: '', colour: ink }); }
+      const needed = lines.length * size * 1.12;
+      if (needed <= bottom - top || size <= h * 0.026) break;
+      size *= 0.94;
+    }
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    let y = top + size;
+    for (const { l, colour } of lines) { if (l) { ctx.fillStyle = colour; ctx.fillText(l, colX, y); } y += l ? size * 1.12 : size * 0.5; }
+
+    // Address.
+    ctx.font = `${Math.round(h * 0.055)}px ${HAND}`; ctx.fillStyle = ink;
+    const ax = w * 0.6, aw = w * 0.34; let ay = h * 0.66;
+    for (const line of ['To you', 'c/o a canal', card.where === 'gate' ? 'Schiphol, gate D' : 'Amsterdam', 'Abroad']) {
+      ctx.fillText(line, ax, ay);
+      ctx.strokeStyle = 'rgba(107,99,90,0.35)'; ctx.beginPath(); ctx.moveTo(ax, ay + h * 0.012); ctx.lineTo(ax + aw, ay + h * 0.012); ctx.stroke();
+      ay += h * 0.075;
+    }
+    // Stamp and postmarks, top right.
+    const sw = w * 0.2, sh = sw * 1.2;
+    drawStamp(ctx, w - sw - w * 0.04, h * 0.05, sw, sh);
+    drawPostmark(ctx, w * 0.72, h * 0.2, w * 0.1, opts.postedTown || 'MANCHESTER', opts.posted || '', 'pm' + card.id, -0.2);
+    if (opts.signed) drawPostmark(ctx, w * 0.87, h * 0.5, w * 0.085, card.where === 'gate' ? 'SCHIPHOL' : 'AMSTERDAM', opts.signed, 'sg' + card.id, 0.18, blue);
+  }
+
+  /// Every card, front and back, on one long sheet.
+  function memento(items, title) {
+    const W = 1000, CW = 920, CH = Math.round(CW * 2 / 3), gap = 36, head = 170;
+    const H = head + items.length * (CH * 2 + gap * 2 + 40) + 60;
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    drawPaper(ctx, W, H, 'memento');
+    ctx.fillStyle = faded; ctx.font = `18px ${TYPED}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('B E E   P O S T', W / 2, 48);
+    ctx.fillStyle = rouge; ctx.font = `bold 64px ${HAND}`;
+    ctx.fillText(title, W / 2, 74);
+    let y = head;
+    const x = (W - CW) / 2;
+    for (const { card, voice, look, opts } of items) {
+      ctx.fillStyle = faded; ctx.font = `14px ${TYPED}`; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(opts.when || '', x, y - 10);
+      for (const side of ['front', 'back']) {
+        const face = document.createElement('canvas'); face.width = CW; face.height = CH;
+        const fctx = face.getContext('2d');
+        if (side === 'front') drawFront(fctx, CW, CH, { ...card, ...voice }, look); else drawBack(fctx, CW, CH, card, voice, opts);
+        ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.22)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 5;
+        ctx.translate(x + CW / 2, y + CH / 2); ctx.rotate((side === 'front' ? -0.6 : 0.5) * Math.PI / 180);
+        ctx.drawImage(face, -CW / 2, -CH / 2); ctx.restore();
+        y += CH + gap;
+      }
+      y += 40;
+    }
+    return c;
+  }
+
+  return { drawPaper, drawFront, drawBack, memento, drawStamp, drawPostmark, drawCorner, scenes, HAND, TYPED };
 })();

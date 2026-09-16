@@ -84,6 +84,7 @@
   .slot .box { height: 120px; border: 1.5px dashed rgba(107,99,90,0.5); border-radius: 3px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; font-family: var(--hand); font-size: 19px; line-height: 1.15; color: var(--faded); }
   .empty { color: var(--faded); font-style: italic; }
   .nothing { font-family: var(--hand); font-size: 20px; color: var(--faded); margin: 4px 0 0; }
+  button.keep { font-family: var(--hand); font-size: 21px; background: var(--honey); color: var(--ink); border: 1px solid rgba(222,145,28,0.55); padding: 9px 22px; box-shadow: 0 2px 3px rgba(0,0,0,0.12); margin-top: 8px; }
 
   /* Setting up. */
   section.setup { border-top: 1px solid var(--shade); margin-top: 26px; padding-top: 18px; }
@@ -152,6 +153,7 @@
     <h2>On the mat</h2>
     <div class="cards" id="cards"></div>
     <p class="nothing" id="nothing"></p>
+    <p><button id="keep" class="hidden keep" type="button">Keep them</button></p>
   </section>
 
   <section class="setup">
