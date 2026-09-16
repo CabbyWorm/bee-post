@@ -471,6 +471,13 @@
     updateMap(state);
     updateTracker(state);
     if (state.delivered.length !== lastCount) { lastCount = state.delivered.length; updateShelf(state); }
+    // Something new on it gets a word, once.
+    const souvenir = state.look.souvenir;
+    if (souvenir && Voice.wearing[souvenir] && store.get('wearing') !== souvenir) {
+      store.set('wearing', souvenir);
+      say(Voice.wearing[souvenir]);
+      lastLeg = state.leg.id;
+    }
     if (state.leg.id !== lastLeg) {
       lastLeg = state.leg.id;
       // A new leg: the bee says its first line about it unprompted.

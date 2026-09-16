@@ -159,6 +159,7 @@ const Voice = (() => {
       "A worker bee stays within five kilometres of the hive her whole life. Five. I'm {km} out.",
       "Not tired. Stop asking.",
       "It's a very big sea and I'm a very small bee and I'm doing it anyway.",
+      "Can feel the Nice weight coming off. Every kilometre's a pastry. Two weeks of them, going into the North Sea.",
       "Steering by the stars. Never done that before. There's more of them out here than there are over Stockport.",
       "There was a ship. Enormous. Lit up like a town. Sat on the rail of it for a bit and then thought, no, that's cheating.",
       "{flight}. That's what this is. The whole thing. On my own.",
@@ -166,6 +167,7 @@ const Voice = (() => {
     ],
     'thu-centraal': [
       "Made it. Sat on a lamp outside the front of the station and I'm not moving for a bit.",
+      "Look at the state of me. A fortnight of French pastry and it's all gone in one night over the sea. Lean as a wasp. Not bitter. A bit bitter.",
       "Trams. Trams everywhere. Blue and white. I've stopped counting because it was upsetting me how many.",
       "There's a boat behind the station that goes across the water and back all day and it's FREE. Been on it twice. Going again.",
       "Bicycles. More bicycles than I've ever seen in one place. More than the whole of Manchester. Nobody's helmet on.",
@@ -340,6 +342,13 @@ const Voice = (() => {
     "Foucault's pendulum in Paris swung all day proving the earth turns. The ferry here goes back and forth all day proving nothing, and it's free, and I prefer it.",
   ];
 
+  /// The first time each new thing is seen on it, said once. See `BeeLook` in
+  /// Carnet: a souvenir is an event, and it gets a line.
+  const wearing = {
+    stroopwafel: "Got a stroopwafel. Off the shop at Schiphol that only sells stroopwafels. It's on my head, where the beret went. Same shape. Better.",
+    tulip: "Got a tulip. Wood. Off the flower market. It's behind my head where the lavender was, and it's staying there.",
+  };
+
   /// Time of day, because a bee is a morning creature and takes it personally.
   const hours = {
     morning: [
@@ -386,6 +395,6 @@ const Voice = (() => {
       .replace(/\{wind\}/g, ctx.wind || 'wherever it likes');
   }
 
-  return { cards, royalMail, legs, general, remembering, hours, facts, fill };
+  return { cards, royalMail, legs, general, remembering, hours, facts, wearing, fill };
 })();
 if (typeof module !== 'undefined') module.exports = Voice;
