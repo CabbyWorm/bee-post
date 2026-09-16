@@ -194,16 +194,79 @@
   }
   function context(state) {
     const near = Trip.nearest(state.pos, sheet === 'sea' ? 60 : 3);
-    return { fromHome: state.fromHome, where: near ? near.name : (state.leg.mode === 'wing' || state.leg.mode === 'plane' ? 'the North Sea' : 'here') };
+    return {
+      fromHome: state.fromHome,
+      where: near ? near.name : (state.leg.mode === 'wing' || state.leg.mode === 'plane' ? 'the North Sea' : 'here'),
+      manc: weather.home ? `${weather.home.temp} degrees and ${weather.home.sky}` : 'overcast, probably spitting',
+      here: weather.here ? `${weather.here.temp} degrees and ${weather.here.sky}` : 'better than that',
+      wind: windRelative(state) || 'wherever it likes',
+    };
   }
+  let audio = null;
+  function buzz() {
+    if (!store.get('buzz', true)) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const t = audio.currentTime;
+      const o = audio.createOscillator(), g = audio.createGain(), lp = audio.createBiquadFilter(), trem = audio.createOscillator(), tg = audio.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(185, t); o.frequency.linearRampToValueAtTime(235, t + 0.1); o.frequency.linearRampToValueAtTime(175, t + 0.3);
+      lp.type = 'lowpass'; lp.frequency.value = 900;
+      trem.frequency.value = 26; tg.gain.value = 0.4; trem.connect(tg); tg.connect(g.gain);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+      o.connect(lp); lp.connect(g); g.connect(audio.destination);
+      o.start(t); trem.start(t); o.stop(t + 0.34); trem.stop(t + 0.34);
+    } catch {}
+  }
+  $('mute').addEventListener('click', () => { const on = !store.get('buzz', true); store.set('buzz', on); $('mute').textContent = on ? 'buzzing: on' : 'buzzing: off'; if (on) buzz(); });
+  $('mute').textContent = store.get('buzz', true) ? 'buzzing: on' : 'buzzing: off';
+
   function sayTheNextThing() {
     if (!current) return;
+    buzz();
     const deck = deckFor(current);
     if (!deck.lines.length) return;
     say(Voice.fill(deck.lines[deck.i % deck.lines.length], context(current)));
     deck.i++;
   }
   $('bee').addEventListener('click', sayTheNextThing);
+
+  // MARK: - Weather
+
+  // The one lookup in the whole thing, and it is not a recommendation: a bee
+  // over the North Sea is allowed to know which way the wind is, and a bee
+  // from Manchester is allowed to know whether it is raining there.
+  const weather = { here: null, home: null, at: 0, forSheet: null };
+  const describe = (c) => {
+    if (!c) return null;
+    const code = c.weather_code, rain = c.precipitation || 0;
+    const sky = code >= 95 ? 'thunder' : code >= 80 ? 'showers' : code >= 71 ? 'snow' : code >= 61 ? 'raining' : code >= 51 ? 'spitting' : code >= 45 ? 'fog' : code >= 3 ? 'overcast' : code >= 1 ? 'a bit of cloud' : 'clear';
+    return { sky, temp: Math.round(c.temperature_2m), wind: Math.round(c.wind_speed_10m), from: c.wind_direction_10m, rain };
+  };
+  const compass = (d) => ['the north', 'the north-east', 'the east', 'the south-east', 'the south', 'the south-west', 'the west', 'the north-west'][Math.round(((d % 360) + 360) % 360 / 45) % 8];
+  async function fetchWeather(state) {
+    const q = (p) => `latitude=${p.lat.toFixed(2)}&longitude=${p.lon.toFixed(2)}&current=temperature_2m,precipitation,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=kmh`;
+    try {
+      const [a, b] = await Promise.all([fetch(`https://api.open-meteo.com/v1/forecast?${q(state.pos)}`), fetch(`https://api.open-meteo.com/v1/forecast?${q(Trip.places.manchester)}`)]);
+      weather.here = describe((await a.json()).current); weather.home = describe((await b.json()).current);
+      weather.at = Date.now(); weather.forSheet = sheet;
+      renderWeather(state);
+    } catch { /* no weather is fine; the bee has opinions anyway */ }
+  }
+  function renderWeather(state) {
+    const w = $('weather');
+    if (!weather.here || !weather.home) { w.textContent = ''; return; }
+    const here = weather.here, home = weather.home;
+    const whereName = sheet === 'sea' ? (state.leg.mode === 'home' ? 'Manchester' : 'Here') : 'Amsterdam';
+    w.textContent = `${whereName} ${here.temp}°, ${here.sky}, wind ${here.wind} km/h from ${compass(here.from)} · Manchester ${home.temp}°, ${home.sky}`;
+  }
+  /// How the wind sits against the way the bee is going.
+  function windRelative(state) {
+    if (!weather.here) return null;
+    const blowingTo = (weather.here.from + 180) % 360;
+    const diff = Math.abs(((blowingTo - state.pos.heading + 540) % 360) - 180);
+    return diff < 50 ? 'behind me, for once' : diff > 130 ? 'in my face. Typical.' : 'across me, which is worse';
+  }
 
   // MARK: - The tracker, and the clock
 
@@ -350,6 +413,7 @@
   function tick() {
     const state = Trip.state(now());
     current = state;
+    if (Date.now() - weather.at > 20 * 60 * 1000 || (weather.forSheet && weather.forSheet !== sheet)) { weather.at = Date.now(); fetchWeather(state); }
     showCreature(state);
     updateMap(state);
     updateTracker(state);

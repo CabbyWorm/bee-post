@@ -153,13 +153,13 @@ const Voice = (() => {
       "Busy.",
       "Over the sea. Dark. Fine.",
       "Twenty-two kilometres an hour. Into a headwind, some of it.",
-      "Wind's behind me now. Wanted that noted.",
+      "Wind's {wind}",
       "Can't see a thing. Can smell chips. Grimsby, probably.",
       "Don't wait up.",
       "A worker bee stays within five kilometres of the hive her whole life. Five. I'm {km} out.",
       "Not tired. Stop asking.",
       "It's a very big sea and I'm a very small bee and I'm doing it anyway.",
-      "Steering by the stars. Never done that before. There's more of them out here than there are over Levenshulme.",
+      "Steering by the stars. Never done that before. There's more of them out here than there are over Stockport.",
       "There was a ship. Enormous. Lit up like a town. Sat on the rail of it for a bit and then thought, no, that's cheating.",
       "{flight}. That's what this is. The whole thing. On my own.",
       "Somewhere near {where}, I reckon. Roughly. No, exactly.",
@@ -314,7 +314,8 @@ const Voice = (() => {
     "{km} kilometres from Manchester. Say that number back to me, go on. {km}.",
     "{miles} miles from home and I weigh less than a paperclip.",
     "A worker bee spends her whole life within about five km of the hive. Five! We're {km} out.",
-    "Manchester right now: overcast, probably spitting. Don't need to check.",
+    "Manchester right now: {manc}. Didn't need to check. Checked anyway.",
+    "Out here: {here}. Back home: {manc}. Not saying anything. Saying it a bit.",
     "{km} km from a wet privet hedge on the Oxford Road. Sit with that a second.",
     "Five eyes on me and I still can't read a Dutch timetable.",
     "I steer by the sun. There's less of it out here than in Nice, and more than at home, so I'm doing about medium.",
@@ -355,7 +356,10 @@ const Voice = (() => {
     const hours = km / 22;
     const flight = hours < 1 ? `${Math.max(1, Math.round(hours * 60))} minutes` : hours < 1.5 ? 'about an hour' : `${Math.round(hours)} hours`;
     return line.replace(/\{km\}/g, String(km)).replace(/\{miles\}/g, String(miles)).replace(/\{flight\}/g, flight)
-      .replace(/\{where\}/g, ctx.where || 'the sea');
+      .replace(/\{where\}/g, ctx.where || 'the sea')
+      .replace(/\{manc\}/g, ctx.manc || 'overcast, probably spitting')
+      .replace(/\{here\}/g, ctx.here || 'better than that')
+      .replace(/\{wind\}/g, ctx.wind || 'wherever it likes');
   }
 
   return { cards, royalMail, legs, general, remembering, facts, fill };
