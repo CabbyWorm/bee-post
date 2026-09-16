@@ -211,7 +211,7 @@
       where: near ? near.name : (state.leg.mode === 'wing' || state.leg.mode === 'plane' ? 'the North Sea' : 'here'),
       manc: weather.home ? `${weather.home.temp} degrees and ${weather.home.sky}` : 'overcast, probably spitting',
       here: weather.here ? `${weather.here.temp} degrees and ${weather.here.sky}` : 'better than that',
-      wind: windRelative(state) || 'wherever it likes',
+      wind: windRelative(state) || 'wherever it likes.',
     };
   }
   let audio = null;
@@ -277,7 +277,7 @@
     if (!weather.here) return null;
     const blowingTo = (weather.here.from + 180) % 360;
     const diff = Math.abs(((blowingTo - state.pos.heading + 540) % 360) - 180);
-    return diff < 50 ? 'behind me, for once' : diff > 130 ? 'in my face. Typical.' : 'across me, which is worse';
+    return diff < 50 ? 'behind me, for once.' : diff > 130 ? 'in my face. Typical.' : 'across me, which is worse.';
   }
 
   // MARK: - The tracker, and the clock

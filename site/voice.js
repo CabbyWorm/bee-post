@@ -392,7 +392,7 @@ const Voice = (() => {
       .replace(/\{where\}/g, ctx.where || 'the sea')
       .replace(/\{manc\}/g, ctx.manc || 'overcast, probably spitting')
       .replace(/\{here\}/g, ctx.here || 'better than that')
-      .replace(/\{wind\}/g, ctx.wind || 'wherever it likes');
+      .replace(/\{wind\}/g, ctx.wind || 'wherever it likes.');
   }
 
   return { cards, royalMail, legs, general, remembering, hours, facts, wearing, fill };
