@@ -6,7 +6,8 @@ const webpush = require('web-push');
 
 const WINDOW_MS = 30 * 60 * 1000; // cron runs late; anything delivered in the last half hour still counts
 const { publicKey } = JSON.parse(fs.readFileSync('site/push.json', 'utf8'));
-const { cards } = JSON.parse(fs.readFileSync('site/schedule.json', 'utf8'));
+const Trip = require('../site/trip.js');
+const cards = Trip.cards.map((c) => ({ ...c, deliveredAt: c.buzzAt || c.deliveredAt }));
 
 const priv = process.env.VAPID_PRIVATE_KEY;
 let subs = [];

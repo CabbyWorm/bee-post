@@ -12,64 +12,139 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Bee Post">
 <meta name="theme-color" content="#F6F1E5">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap">
 <style>
   :root {
     --paper: #F6F1E5; --shade: #EAE3D4; --ink: #2E2924; --faded: #6B635A;
-    --bee: #E8B324; --sea: #C9D6D3; --red: #8C3A2B;
+    --honey: #F5BD33; --honey-deep: #DE911C; --sea: #C9D6D3; --rouge: #A33B29; --blue: #1B4965;
+    --hand: "Caveat", "Bradley Hand", "Noteworthy", "Marker Felt", cursive;
+    --typed: "American Typewriter", "Courier New", Menlo, monospace;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--paper); color: var(--ink); }
   body {
     font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    font-size: 18px; line-height: 1.45;
-    padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+    font-size: 17px; line-height: 1.45;
+    padding: max(14px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
     background-image: radial-gradient(ellipse at 50% 30%, var(--paper) 55%, var(--shade) 130%);
-    min-height: 100vh;
+    min-height: 100vh; overflow-x: hidden;
   }
   main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; }
-  /* Until the door is ready, the setup comes first — it is the one thing the page needs doing. */
   body.setup-first section.setup { order: -1; border-top: 0; border-bottom: 1px solid var(--shade); margin: 0 0 22px; padding: 0 0 18px; }
   body.setup-first section.setup h2 { font-size: 24px; }
-  h1 { font-weight: normal; font-size: 30px; line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.01em; }
-  p { margin: 0 0 14px; }
-  .postmark {
-    display: inline-block; border: 2px solid var(--faded); border-radius: 50%;
-    padding: 10px 14px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--faded); transform: rotate(-8deg); margin: 4px 0 10px; line-height: 1.3; text-align: center;
+  h1, h2 { font-weight: normal; margin: 0; }
+  p { margin: 0 0 12px; }
+  .typed { font-family: var(--typed); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faded); }
+  header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  header .typed { font-size: 12px; }
+  .hidden { display: none !important; }
+
+  /* The bee, and what it is saying. */
+  .creature { display: flex; flex-direction: column; align-items: center; margin: 6px 0 10px; }
+  .bubble {
+    position: relative; background: rgba(255,255,255,0.82); border: 1px solid rgba(107,99,90,0.35);
+    border-radius: 16px; padding: 12px 18px 14px; margin: 0 8px 14px; width: calc(100% - 16px);
+    font-family: var(--hand); font-size: 22px; line-height: 1.2; color: var(--ink);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.08); min-height: 54px;
   }
-  figure { margin: 18px 0; }
+  .bubble::after, .bubble::before {
+    content: ""; position: absolute; left: 52%; bottom: -13px; border: 8px solid transparent; border-top-color: rgba(107,99,90,0.35); border-bottom: 0;
+    transform: translateX(-50%);
+  }
+  .bubble::after { bottom: -11px; border-top-color: rgba(255,255,255,0.95); }
+  .bubble.said { animation: say .22s ease-out; }
+  @keyframes say { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+  #bee { width: 268px; height: 296px; display: block; cursor: pointer; }
+  .where { margin-top: 2px; text-align: center; }
+
+  /* The tracker. */
+  .tracker { margin: 14px 0 8px; }
   #map { width: 100%; height: auto; display: block; border: 1px solid var(--shade); background: var(--sea); border-radius: 6px; }
-  .readout { font-size: 15px; color: var(--faded); margin-top: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .said { min-height: 1.5em; font-style: italic; margin-top: 8px; }
-  .bee { cursor: pointer; }
-  .bee .wing { animation: beat .16s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
-  @keyframes beat { from { transform: scaleY(.75); } to { transform: scaleY(1); } }
-  @media (prefers-reduced-motion: reduce) { .bee .wing { animation: none; } }
+  .legline { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-top: 8px; font-size: 15px; }
+  .legline b { font-weight: normal; font-family: var(--hand); font-size: 21px; }
+  .progress { height: 3px; background: var(--shade); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--honey-deep); width: 0; transition: width .5s; }
+  .times { display: flex; justify-content: space-between; margin-top: 5px; }
+
+  /* The shelf. */
+  .shelf { margin-top: 24px; }
+  .shelf h2 { font-family: var(--hand); font-size: 26px; margin-bottom: 8px; }
+  .cards { display: flex; gap: 12px; overflow-x: auto; padding: 6px 2px 12px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .cards::-webkit-scrollbar { display: none; }
+  .thumb { flex: 0 0 auto; width: 168px; scroll-snap-align: start; cursor: pointer; position: relative; }
+  .thumb canvas { width: 168px; height: 120px; display: block; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.18); transform: rotate(-1.2deg); }
+  .thumb:nth-child(even) canvas { transform: rotate(1.4deg); }
+  .thumb .when { margin-top: 8px; text-align: center; }
+  .thumb.unread::after { content: ""; position: absolute; top: -4px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--honey-deep); box-shadow: 0 0 0 2px var(--paper); }
+  .slot { flex: 0 0 auto; width: 168px; scroll-snap-align: start; }
+  .slot .box { height: 120px; border: 1.5px dashed rgba(107,99,90,0.5); border-radius: 3px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10px; font-family: var(--hand); font-size: 19px; line-height: 1.15; color: var(--faded); }
+  .empty { color: var(--faded); font-style: italic; }
+  .nothing { font-family: var(--hand); font-size: 20px; color: var(--faded); margin: 4px 0 0; }
+
+  /* Setting up. */
   section.setup { border-top: 1px solid var(--shade); margin-top: 26px; padding-top: 18px; }
-  h2 { font-weight: normal; font-size: 20px; margin: 0 0 10px; }
+  section.setup h2 { font-size: 20px; margin: 0 0 10px; }
   ol { padding-left: 22px; margin: 0 0 12px; } li { margin-bottom: 6px; }
-  button {
-    font: inherit; font-size: 17px; background: var(--ink); color: var(--paper);
-    border: 0; border-radius: 999px; padding: 12px 22px; cursor: pointer;
-  }
+  button { font: inherit; font-size: 17px; background: var(--ink); color: var(--paper); border: 0; border-radius: 999px; padding: 12px 22px; cursor: pointer; }
   button:disabled { opacity: .5; }
   .hint { font-size: 15px; color: var(--faded); }
   textarea { width: 100%; font: 12px/1.3 ui-monospace, Menlo, monospace; height: 110px; margin-top: 8px; background: #fff; border: 1px solid var(--shade); border-radius: 6px; padding: 8px; }
-  .hidden { display: none !important; }
   footer { margin-top: 30px; font-size: 13px; color: var(--faded); }
+
+  /* A card, opened. */
+  .overlay { position: fixed; inset: 0; background: rgba(46,41,36,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .overlay .close { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; background: rgba(246,241,229,0.9); color: var(--ink); width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 22px; line-height: 40px; }
+  .card { width: min(92vw, 560px); aspect-ratio: 3 / 2; perspective: 1400px; position: relative; }
+  .card .flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.4,.1,.2,1); }
+  .card.turned .flip { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); overflow: hidden; background: #F8F3E7; }
+  .face.front canvas { width: 100%; height: 100%; display: block; }
+  .face.back { transform: rotateY(180deg); }
+  .back .paper { position: absolute; inset: 0; }
+  .back .divider { position: absolute; left: 55%; top: 9%; bottom: 9%; width: 1px; background: rgba(107,99,90,0.45); }
+  .back .corner { position: absolute; right: 0; top: 0; width: 45%; height: 62%; }
+  .back .corner canvas { width: 100%; height: 100%; display: block; }
+  .back .message { position: absolute; left: 5%; top: 6%; width: 47%; bottom: 6%; overflow-y: auto; font-family: var(--hand); font-size: clamp(14px, 3.4vw, 20px); line-height: 1.12; color: var(--ink); padding-right: 4px; }
+  .back .message p { margin: 0 0 .6em; }
+  .back .message .ps { color: var(--blue); }
+  .back .address { position: absolute; left: 60%; right: 6%; bottom: 8%; font-family: var(--hand); font-size: clamp(14px, 3.4vw, 20px); line-height: 1.18; color: var(--ink); }
+  .back .address i { display: block; font-style: normal; border-bottom: 1px solid rgba(107,99,90,0.35); }
+  .back .sign { position: absolute; right: 6%; top: 44%; font-family: var(--typed); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); }
+  .card .tapme { position: absolute; left: 0; right: 0; bottom: -34px; text-align: center; color: var(--paper); font-family: var(--hand); font-size: 19px; opacity: .85; }
+  .question { margin-top: 10px; }
+  .question .ask { font-family: var(--hand); }
+  .answers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .answers button { font-family: var(--hand); font-size: 17px; padding: 4px 12px; background: var(--honey); color: var(--ink); border: 1px solid rgba(222,145,28,0.6); }
+  .answers button.chosen { background: var(--ink); color: var(--paper); }
+  .answers button:disabled { opacity: .6; }
+  .answered { font-family: var(--hand); color: var(--faded); }
+  @media (prefers-reduced-motion: reduce) { .card .flip { transition: none; } .bubble.said { animation: none; } }
 </style>
 </head>
 <body>
 <main>
-  <div class="postmark">Manchester<br>16 Sep 2026</div>
-  <h1>The bee's gone.</h1>
-  <p>Left Manchester at eight this morning and told nobody. It's over the North Sea now, doing about twenty-two kilometres an hour, and it reckons on Amsterdam Centraal for half past seven tomorrow morning.</p>
+  <header><span class="typed">Bee Post</span><span class="typed" id="clock"></span></header>
 
-  <figure>
-    <svg id="map" viewBox="0 0 600 360" role="img" aria-label="A map of the North Sea with a bee somewhere over it"></svg>
-    <div class="readout"><span id="out">—</span><span id="eta">—</span></div>
-    <div class="said" id="said">Tap the bee if you want a word. It's busy.</div>
-  </figure>
+  <section class="creature">
+    <div class="bubble" id="bubble">…</div>
+    <canvas id="bee" aria-live="polite"></canvas>
+    <div class="where typed" id="where"></div>
+  </section>
+
+  <section class="tracker">
+    <svg id="map" viewBox="0 0 600 360" role="img" aria-label="Where the bee is"></svg>
+    <div class="legline"><b id="leg"></b><span class="typed" id="mode"></span></div>
+    <div class="progress"><i id="bar"></i></div>
+    <div class="times typed"><span id="from"></span><span id="to"></span></div>
+    <p class="hint" id="said" style="margin-top:8px"></p>
+  </section>
+
+  <section class="shelf">
+    <h2>On the mat</h2>
+    <div class="cards" id="cards"></div>
+    <p class="nothing" id="nothing"></p>
+  </section>
 
   <section class="setup">
     <h2>First: so the bee can find you</h2>
@@ -93,12 +168,35 @@
       <p class="hint" id="share-hint"></p>
     </div>
     <div id="step-ready" class="hidden">
-      <p>All set. Put the phone down. It's got a long way to go yet.</p>
+      <p class="hint">The bee knows which door.</p>
     </div>
   </section>
 
-  <footer>Distances are as the bee flies.</footer>
+  <footer>Distances are as the bee flies. Times are Amsterdam's.</footer>
 </main>
+
+<div id="overlay" class="overlay hidden" role="dialog" aria-modal="true">
+  <button class="close" id="close" aria-label="Put it down">×</button>
+  <div class="card" id="card">
+    <div class="flip">
+      <div class="face front"><canvas id="front"></canvas></div>
+      <div class="face back">
+        <canvas class="paper" id="backpaper"></canvas>
+        <div class="divider"></div>
+        <div class="corner" id="corner" title="Sign for it"><canvas id="cornercanvas"></canvas></div>
+        <div class="sign" id="signhint">press the stamp to sign for it</div>
+        <div class="message" id="message"></div>
+        <div class="address" id="address"></div>
+      </div>
+    </div>
+    <div class="tapme" id="tapme">tap to turn it over</div>
+  </div>
+</div>
+
+<script src="bee.js"></script>
+<script src="trip.js"></script>
+<script src="voice.js"></script>
+<script src="postcard.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

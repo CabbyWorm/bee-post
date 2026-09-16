@@ -1,6 +1,6 @@
 // Bee Post service worker: keeps the shell offline, and shows the buzz.
-const CACHE = 'bee-post-v4';
-const SHELL = ['./', './index.html', './app.js', './outlines.json', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+const CACHE = 'bee-post-v5';
+const SHELL = ['./', './index.html', './app.js', './bee.js', './trip.js', './voice.js', './postcard.js', './outlines.json', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -16,6 +16,10 @@ self.addEventListener('activate', (e) => {
 // Content (schedule, push key) is network-first so a redeploy shows up; the shell is cache-first.
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((r) => { caches.open(CACHE).then((c) => c.put(e.request, r.clone())); return r; })));
+    return;
+  }
   if (url.origin !== location.origin) return;
   if (url.pathname.endsWith('.json')) {
     e.respondWith(fetch(e.request).then((r) => { caches.open(CACHE).then((c) => c.put(e.request, r.clone())); return r; })
