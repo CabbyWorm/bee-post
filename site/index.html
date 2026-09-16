@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Bee Post">
@@ -96,6 +97,7 @@
   .overlay { position: fixed; inset: 0; background: rgba(46,41,36,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
   .overlay .close { position: absolute; top: max(14px, env(safe-area-inset-top)); right: 16px; background: rgba(246,241,229,0.9); color: var(--ink); width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 22px; line-height: 40px; }
   .card { width: min(92vw, 560px); aspect-ratio: 3 / 2; perspective: 1400px; position: relative; }
+  @media (max-width: 520px) { .card { aspect-ratio: 1 / 1; max-height: 78vh; } }
   .card .flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.4,.1,.2,1); }
   .card.turned .flip { transform: rotateY(180deg); }
   .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); overflow: hidden; background: #F8F3E7; }
@@ -103,14 +105,14 @@
   .face.back { transform: rotateY(180deg); }
   .back .paper { position: absolute; inset: 0; }
   .back .divider { position: absolute; left: 55%; top: 9%; bottom: 9%; width: 1px; background: rgba(107,99,90,0.45); }
-  .back .corner { position: absolute; right: 0; top: 0; width: 45%; height: 62%; }
+  .back .corner { position: absolute; right: 0; top: 0; width: 45%; height: 52%; }
   .back .corner canvas { width: 100%; height: 100%; display: block; }
-  .back .message { position: absolute; left: 5%; top: 6%; width: 47%; bottom: 6%; overflow-y: auto; font-family: var(--hand); font-size: clamp(14px, 3.4vw, 20px); line-height: 1.12; color: var(--ink); padding-right: 4px; }
+  .back .message { position: absolute; left: 5%; top: 6%; width: 47%; bottom: 6%; overflow-y: auto; font-family: var(--hand); font-size: clamp(15px, 3.6vw, 20px); line-height: 1.12; color: var(--ink); padding-right: 4px; -webkit-mask-image: linear-gradient(#000 92%, transparent); mask-image: linear-gradient(#000 92%, transparent); }
   .back .message p { margin: 0 0 .6em; }
   .back .message .ps { color: var(--blue); }
-  .back .address { position: absolute; left: 60%; right: 6%; bottom: 8%; font-family: var(--hand); font-size: clamp(14px, 3.4vw, 20px); line-height: 1.18; color: var(--ink); }
+  .back .address { position: absolute; left: 60%; right: 6%; bottom: 7%; font-family: var(--hand); font-size: clamp(14px, 3.4vw, 20px); line-height: 1.18; color: var(--ink); }
   .back .address i { display: block; font-style: normal; border-bottom: 1px solid rgba(107,99,90,0.35); }
-  .back .sign { position: absolute; right: 6%; top: 44%; font-family: var(--typed); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); }
+  .back .sign { position: absolute; right: 6%; top: 53%; width: 39%; text-align: right; font-family: var(--typed); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); }
   .card .tapme { position: absolute; left: 0; right: 0; bottom: -34px; text-align: center; color: var(--paper); font-family: var(--hand); font-size: 19px; opacity: .85; }
   .question { margin-top: 10px; }
   .question .ask { font-family: var(--hand); }

@@ -19,6 +19,8 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # The service worker's cache is keyed by commit, so every deploy is a new shell.
+      - run: sed -i "s/bee-post-v[0-9a-z]*/bee-post-${GITHUB_SHA::8}/" site/sw.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
