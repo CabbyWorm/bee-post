@@ -39,8 +39,9 @@
   .readout { font-size: 15px; color: var(--faded); margin-top: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .said { min-height: 1.5em; font-style: italic; margin-top: 8px; }
   .bee { cursor: pointer; }
-  .bee .wing { animation: beat .12s linear infinite alternate; transform-origin: center; }
-  @keyframes beat { from { transform: scaleY(.6); } to { transform: scaleY(1); } }
+  .bee .wing { animation: beat .16s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+  @keyframes beat { from { transform: scaleY(.75); } to { transform: scaleY(1); } }
+  @media (prefers-reduced-motion: reduce) { .bee .wing { animation: none; } }
   section.setup { border-top: 1px solid var(--shade); margin-top: 26px; padding-top: 18px; }
   h2 { font-weight: normal; font-size: 20px; margin: 0 0 10px; }
   ol { padding-left: 22px; margin: 0 0 12px; } li { margin-bottom: 6px; }

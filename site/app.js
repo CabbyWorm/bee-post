@@ -66,18 +66,20 @@ async function drawMap() {
     t.textContent = name;
   }
 
-  // The bee, drawn small. Sunglasses are from Nice; it hasn't taken them off since.
+  // The bee, drawn small, facing +x. Sunglasses are from Nice; it hasn't taken them off since.
   const bee = el('g', { class: 'bee' }, map);
-  el('ellipse', { class: 'wing', cx: -3, cy: -6, rx: 6, ry: 3, fill: '#fff', 'fill-opacity': .7, stroke: '#2E2924', 'stroke-width': .8 }, bee);
-  el('ellipse', { class: 'wing', cx: 3, cy: -6, rx: 6, ry: 3, fill: '#fff', 'fill-opacity': .7, stroke: '#2E2924', 'stroke-width': .8 }, bee);
-  el('ellipse', { cx: 0, cy: 0, rx: 9, ry: 6, fill: '#E8B324', stroke: '#2E2924', 'stroke-width': 1.2 }, bee);
-  el('path', { d: 'M-3 -6v12M2 -6v12M6 -4v8', stroke: '#2E2924', 'stroke-width': 2, 'stroke-linecap': 'round' }, bee);
-  el('circle', { cx: -10, cy: -1, r: 4, fill: '#E8B324', stroke: '#2E2924', 'stroke-width': 1.2 }, bee);
-  el('rect', { x: -14, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, bee);
-  el('rect', { x: -10, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, bee);
+  const body = el('g', { class: 'body' }, bee);
+  el('ellipse', { class: 'wing', cx: -3, cy: -6, rx: 6, ry: 3, fill: '#fff', 'fill-opacity': .7, stroke: '#2E2924', 'stroke-width': .8 }, body);
+  el('ellipse', { class: 'wing', cx: 3, cy: -6, rx: 6, ry: 3, fill: '#fff', 'fill-opacity': .7, stroke: '#2E2924', 'stroke-width': .8 }, body);
+  el('ellipse', { cx: 0, cy: 0, rx: 9, ry: 6, fill: '#E8B324', stroke: '#2E2924', 'stroke-width': 1.2 }, body);
+  el('path', { d: 'M3 -6v12M-2 -6v12M-6 -4v8', stroke: '#2E2924', 'stroke-width': 2, 'stroke-linecap': 'round' }, body);
+  el('circle', { cx: 10, cy: -1, r: 4, fill: '#E8B324', stroke: '#2E2924', 'stroke-width': 1.2 }, body);
+  el('rect', { x: 6.5, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, body);
+  el('rect', { x: 10.5, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, body);
+  el('path', { d: 'M-9 0l-3 1', stroke: '#2E2924', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, body);
   // A postcard, tucked underneath.
-  el('rect', { x: -4, y: 4, width: 10, height: 6, fill: '#fff', stroke: '#2E2924', 'stroke-width': .8, transform: 'rotate(-12 1 7)' }, bee);
-  el('rect', { x: 3, y: 5, width: 2, height: 2, fill: '#8C3A2B', transform: 'rotate(-12 1 7)' }, bee);
+  el('rect', { x: -6, y: 4, width: 10, height: 6, fill: '#fff', stroke: '#2E2924', 'stroke-width': .8, transform: 'rotate(12 -1 7)' }, body);
+  el('rect', { x: 1, y: 5, width: 2, height: 2, fill: '#8C3A2B', transform: 'rotate(12 -1 7)' }, body);
   bee.addEventListener('click', poke);
   return bee;
 }
@@ -107,7 +109,10 @@ function tick(bee) {
   const f = Math.min(1, Math.max(0, (now - DEPART) / (ARRIVE - DEPART)));
   const p = along(MAN, AMS, f);
   const [x, y] = px(p);
+  const q = px(along(MAN, AMS, Math.min(1, f + 0.02)));
+  const heading = Math.atan2(q[1] - y, q[0] - x) * 180 / Math.PI;
   bee.setAttribute('transform', `translate(${x} ${y})`);
+  bee.querySelector('.body').setAttribute('transform', `rotate(${heading.toFixed(1)})`);
   const done = total * f;
   if (f >= 1) {
     out.textContent = 'At Centraal.'; eta.textContent = 'Delivered.';
@@ -122,6 +127,12 @@ drawMap().then((bee) => { tick(bee); setInterval(() => tick(bee), 30 * 1000); })
 // ---- The door: install, then allow the buzz, then send the subscription on.
 
 const $ = (id) => document.getElementById(id);
+// Which door this is. `?as=test` marks a phone the buzz can be tried on without bothering the real one.
+const asParam = new URLSearchParams(location.search).get('as');
+if (asParam) { try { localStorage.setItem('bee-post:label', asParam); } catch {} }
+let label = 'post';
+try { label = localStorage.getItem('bee-post:label') || 'post'; } catch {}
+const withLabel = (sub) => JSON.stringify({ label, ...JSON.parse(JSON.stringify(sub)) });
 const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 const canPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -137,7 +148,7 @@ async function setup() {
   const existing = await reg.pushManager.getSubscription();
   if (existing) {
     if (localStorage.getItem('bee-post:sent') === existing.endpoint) show('ready');
-    else { $('sub').value = JSON.stringify(existing); show('send'); }
+    else { $('sub').value = withLabel(existing); show('send'); }
     return;
   }
   show('buzz');
@@ -157,7 +168,7 @@ $('allow').addEventListener('click', async () => {
     const { publicKey } = await (await fetch('push.json')).json();
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(publicKey) });
-    $('sub').value = JSON.stringify(sub);
+    $('sub').value = withLabel(sub);
     show('send');
   } catch (e) {
     $('allow-hint').textContent = 'Hm. ' + (e && e.message ? e.message : e);

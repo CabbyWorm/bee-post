@@ -14,6 +14,10 @@ on:
       text:
         description: 'Or a one-off message to buzz instead'
         required: false
+      to:
+        description: 'Which door: a label such as test, or all'
+        required: false
+        default: 'test'
 permissions:
   contents: read
 jobs:
@@ -31,3 +35,4 @@ jobs:
           PUSH_SUBS: ${{ secrets.PUSH_SUBS }}
           CARD: ${{ inputs.card }}
           TEXT: ${{ inputs.text }}
+          TO: ${{ inputs.to }}

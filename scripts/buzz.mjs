@@ -13,9 +13,12 @@ let subs = [];
 try { subs = JSON.parse(process.env.PUSH_SUBS || '[]'); } catch { subs = []; }
 if (!Array.isArray(subs)) subs = [subs];
 subs = subs.filter((s) => s && s.endpoint);
+// Manual sends can be aimed at one label (e.g. `test`); the schedule goes to every door.
+const to = process.env.TO && process.env.TO !== 'all' ? process.env.TO : null;
+if (to) subs = subs.filter((s) => (s.label || 'post') === to);
 
 if (!priv || subs.length === 0) {
-  console.log(`nothing to do: ${priv ? '' : 'no VAPID key; '}${subs.length} subscription(s)`);
+  console.log(`nothing to do: ${priv ? '' : 'no VAPID key; '}${subs.length} subscription(s)${to ? ' labelled ' + to : ''}`);
   process.exit(0);
 }
 webpush.setVapidDetails('https://github.com/CabbyWorm/bee-post', publicKey, priv);
@@ -40,7 +43,7 @@ for (const c of due) {
   for (const s of subs) {
     try {
       await webpush.sendNotification(s, payload, { TTL: 60 * 60, urgency: 'high' });
-      console.log(`sent ${c.id} -> ${s.endpoint.slice(0, 40)}…`);
+      console.log(`sent ${c.id} -> ${s.label || 'post'} ${s.endpoint.slice(0, 40)}…`);
     } catch (err) {
       console.log(`failed ${c.id} -> ${s.endpoint.slice(0, 40)}…: ${err.statusCode || ''} ${err.body || err.message}`);
       if (err.statusCode === 410 || err.statusCode === 404) console.log('  (subscription gone; it needs re-subscribing)');
