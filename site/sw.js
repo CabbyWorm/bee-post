@@ -42,13 +42,17 @@ self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
   const title = d.title || 'Post.';
-  e.waitUntil(self.registration.showNotification(title, {
-    body: d.body || 'There is something on the mat.',
-    tag: d.tag || 'bee-post',
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    data: { url: d.url || './' },
-  }));
+  e.waitUntil(Promise.all([
+    self.registration.showNotification(title, {
+      body: d.body || 'There is something on the mat.',
+      tag: d.tag || 'bee-post',
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      data: { url: d.url || './' },
+    }),
+    // A dot on the icon, for a phone that missed the buzz.
+    (async () => { try { if (self.navigator.setAppBadge) await self.navigator.setAppBadge(1); } catch {} })(),
+  ]));
 });
 
 self.addEventListener('notificationclick', (e) => {

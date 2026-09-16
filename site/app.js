@@ -348,6 +348,8 @@
     const v = Voice.cards[id];
     openId = id;
     const seen = store.get('seen', []); if (!seen.includes(id)) { seen.push(id); store.set('seen', seen); }
+    try { if (navigator.clearAppBadge) navigator.clearAppBadge(); } catch {}
+    document.body.classList.add('locked');
     thumbs[id]?.classList.remove('unread');
     $('card').classList.remove('turned');
     $('tapme').textContent = 'tap to turn it over';
@@ -423,7 +425,7 @@
     $('tapme').textContent = c.classList.contains('turned') ? 'tap to turn it back' : 'tap to turn it over';
     if (c.classList.contains('turned')) setTimeout(() => drawCorner(Trip.cards.find((x) => x.id === openId)), 60);
   });
-  $('close').addEventListener('click', () => { $('overlay').classList.add('hidden'); openId = null; if (location.hash) history.replaceState(null, '', location.pathname + location.search); });
+  $('close').addEventListener('click', () => { $('overlay').classList.add('hidden'); document.body.classList.remove('locked'); openId = null; if (location.hash) history.replaceState(null, '', location.pathname + location.search); });
   $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('close').click(); });
 
   // MARK: - Keeping them
