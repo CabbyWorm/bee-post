@@ -472,7 +472,11 @@
     showCreature(state);
     updateMap(state);
     updateTracker(state);
-    if (state.delivered.length !== lastCount) { lastCount = state.delivered.length; updateShelf(state); }
+    if (state.delivered.length !== lastCount) {
+      // Post landing while the page is open gets announced; the dot does the rest.
+      if (lastCount >= 0 && state.delivered.length > lastCount) say(['Post! On the mat. Go on.', 'That\'s one landed. Have a look.', 'Delivered. Signed for by nobody yet.'][state.delivered.length % 3]);
+      lastCount = state.delivered.length; updateShelf(state);
+    }
     // Something new on it gets a word, once.
     const souvenir = state.look.souvenir;
     if (souvenir && Voice.wearing[souvenir] && store.get('wearing') !== souvenir) {
