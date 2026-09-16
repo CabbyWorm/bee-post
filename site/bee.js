@@ -467,9 +467,13 @@ const Bee = (() => {
   /// Keeps a canvas drawing the bee off the clock. Returns a stop function.
   function animate(canvas, getOpts) {
     const ctx = canvas.getContext('2d');
-    let raf = 0;
+    let raf = 0, last = 0;
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function frame(t) {
+      // Thirty frames a second is plenty for a wingbeat drawn with blurs, and
+      // half the battery of sixty.
+      if (!reduce && t - last < 30) { raf = requestAnimationFrame(frame); return; }
+      last = t;
       const dpr = window.devicePixelRatio || 1;
       const w = canvas.clientWidth, h = canvas.clientHeight;
       if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
