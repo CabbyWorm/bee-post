@@ -77,9 +77,6 @@ async function drawMap() {
   el('rect', { x: 6.5, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, body);
   el('rect', { x: 10.5, y: -3, width: 3.5, height: 2.5, fill: '#2E2924' }, body);
   el('path', { d: 'M-9 0l-3 1', stroke: '#2E2924', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, body);
-  // A postcard, tucked underneath.
-  el('rect', { x: -6, y: 4, width: 10, height: 6, fill: '#fff', stroke: '#2E2924', 'stroke-width': .8, transform: 'rotate(12 -1 7)' }, body);
-  el('rect', { x: 1, y: 5, width: 2, height: 2, fill: '#8C3A2B', transform: 'rotate(12 -1 7)' }, body);
   bee.addEventListener('click', poke);
   return bee;
 }
@@ -87,7 +84,7 @@ async function drawMap() {
 const lines = [
   'Busy.',
   'Over the sea. Dark. Fine.',
-  "Twenty-two kilometres an hour, and that's with a card.",
+  "Twenty-two kilometres an hour. Into a headwind, some of it.",
   "Wind's behind me. Wanted that noted.",
   "Can't see a thing. Can smell chips.",
   "Don't wait up.",
