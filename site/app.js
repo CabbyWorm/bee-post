@@ -139,6 +139,7 @@ const canPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Noti
 
 function show(step) {
   for (const s of ['install', 'buzz', 'send', 'ready']) $('step-' + s).classList.toggle('hidden', s !== step);
+  document.body.classList.toggle('setup-first', step !== 'ready');
 }
 
 async function setup() {

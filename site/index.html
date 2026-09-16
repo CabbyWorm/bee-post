@@ -26,7 +26,10 @@
     background-image: radial-gradient(ellipse at 50% 30%, var(--paper) 55%, var(--shade) 130%);
     min-height: 100vh;
   }
-  main { max-width: 520px; margin: 0 auto; }
+  main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; }
+  /* Until the door is ready, the setup comes first — it is the one thing the page needs doing. */
+  body.setup-first section.setup { order: -1; border-top: 0; border-bottom: 1px solid var(--shade); margin: 0 0 22px; padding: 0 0 18px; }
+  body.setup-first section.setup h2 { font-size: 24px; }
   h1 { font-weight: normal; font-size: 30px; line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.01em; }
   p { margin: 0 0 14px; }
   .postmark {
@@ -70,11 +73,12 @@
   </figure>
 
   <section class="setup">
-    <h2>So the post can find you</h2>
+    <h2>First: so the post can find you</h2>
     <div id="step-install">
       <ol>
-        <li>Tap <strong>Share</strong> in Safari, then <strong>Add to Home Screen</strong>.</li>
-        <li>Open it from there — the bee can only knock on a door that's on the home screen.</li>
+        <li>Tap <strong>Share</strong> in Safari (the square with the arrow, bottom of the screen), then <strong>Add to Home Screen</strong>.</li>
+        <li>Open it from the home screen — the bee can only knock on a door that's there.</li>
+        <li>It'll ask to buzz. Say yes, then send the code it gives you back to whoever sent you this.</li>
       </ol>
       <p class="hint">Not on an iPhone? Skip to the button; it'll appear when it can.</p>
     </div>

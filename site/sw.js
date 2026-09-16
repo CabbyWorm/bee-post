@@ -1,5 +1,5 @@
 // Bee Post service worker: keeps the shell offline, and shows the buzz.
-const CACHE = 'bee-post-v2';
+const CACHE = 'bee-post-v3';
 const SHELL = ['./', './index.html', './app.js', './outlines.json', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
