@@ -5,7 +5,7 @@
 name: buzz
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/15 * * * *'   # every quarter hour; the script decides what is due
   workflow_dispatch:
     inputs:
       card:
