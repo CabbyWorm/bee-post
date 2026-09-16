@@ -384,13 +384,14 @@
     $('address').replaceChildren(h('i', {}, 'To you'), h('i', {}, 'c/o a canal'), h('i', {}, card.where === 'gate' ? 'Schiphol, gate D' : 'Amsterdam'), h('i', {}, 'Abroad'));
     drawCorner(card);
     $('overlay').classList.remove('hidden');
+    say(['Go on. Turn it over.', 'Other side.', 'Read the back. I wrote it small so it would fit.', 'That one took some getting here.'][Number(id) % 4]);
   }
   function drawCorner(card) {
     const cc = $('cornercanvas'), box = $('corner');
     const w = Math.max(120, box.clientWidth || 200), hh = Math.max(120, box.clientHeight || 150);
     cc.width = Math.round(w * dpr()); cc.height = Math.round(hh * dpr());
     const ctx = cc.getContext('2d'); ctx.setTransform(dpr(), 0, 0, dpr(), 0, 0);
-    const signed = store.get('signed', {})[card.id];
+    const signed = store.get('signed', {})[card.id] || (params.has('signed') ? now() : null);
     const posted = Trip.legs.find((l) => l.id === card.by);
     const postedTown = ['01', '02', '04'].includes(card.id) ? 'MANCHESTER' : 'AMSTERDAM';
     const layer = document.createElement('canvas'); layer.width = cc.width; layer.height = cc.height;
