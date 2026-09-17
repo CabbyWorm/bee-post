@@ -319,11 +319,16 @@ const Voice = (() => {
     "Manchester right now: {manc}. Didn't need to check. Checked anyway.",
     "Out here: {here}. Back home: {manc}. Not saying anything. Saying it a bit.",
     "{km} km from a wet privet hedge on the Oxford Road. Sit with that a second.",
-    "Five eyes on me and I still can't read a Dutch timetable.",
     "I steer by the sun. There's less of it out here than in Nice, and more than at home, so I'm doing about medium.",
     "Bees remember faces. I know yours. I've formed some opinions.",
     "Wings go a couple of hundred beats a second, which is why I sound narked when I'm actually over the moon.",
+  ];
+
+  /// Only once it is actually stood in the country.
+  const inHolland = [
+    "Five eyes on me and I still can't read a Dutch timetable.",
     "I can smell a flower from a kilometre off. This whole country smells of wet stone and coffee and I'm not complaining.",
+    "Everybody here is taller than everybody at home, and I'm the same size as ever, so it's all relative.",
   ];
 
   /// What it says about the place it has been, when it gets going. Only
@@ -331,14 +336,14 @@ const Voice = (() => {
   /// half, Avignon, Wave Island, and five days in Nice.
   const remembering = [
     "Nice had trams with no wires over the big square. Glided across, charged up at the stops. Every tram here's got a wire. Every one. I keep checking and I keep being right.",
-    "They've got a flower market on a canal here. Avignon had a garden growing up the front of Les Halles. Same idea. Different way round.",
+    { from: '2026-09-18T14:20:00Z', line: "They've got a flower market on a canal here. Avignon had a garden growing up the front of Les Halles. Same idea. Different way round." },
     "Got thrown out of the casino in Monte-Carlo, me. Nobody's thrown me out of anywhere here yet. Early days.",
     "Èze was four hundred metres straight up a rock. This whole country's flat as a plate. My wings have never had it so easy.",
     "The oceanographic museum in Monaco hung off a cliff over the sea. Here they've got a boat that crosses the water for nothing and I think that's better, and I'll argue it.",
     "Wave Island had a pool that made its own waves in a field. Amsterdam's got the actual sea a train ride off and it doesn't bother.",
     "The Promenade in Nice had blue chairs all facing the sea. Here the chairs face the canal and the canal doesn't do anything and everybody's fine with that.",
     "Chagall's museum was blue everywhere. Very calm room. The trams here are blue and white and nothing about them is calm.",
-    "Went up the Colline du Château in Nice for the view. There isn't a hill here. Went up the station instead. It's got gold on the roof.",
+    { from: '2026-09-19T07:30:00Z', line: "Went up the Colline du Château in Nice for the view. There isn't a hill here. Went up the station instead. It's got gold on the roof." },
     "Foucault's pendulum in Paris swung all day proving the earth turns. The ferry here goes back and forth all day proving nothing, and it's free, and I prefer it.",
   ];
 
@@ -347,7 +352,7 @@ const Voice = (() => {
   const treats = [
     { name: 'Van Stapele', what: 'One biscuit. Just the one kind. Dark chocolate outside, white chocolate still runny inside. There is a queue and the queue is correct.', where: 'Heisteeg, off the Spui' },
     { name: 'Winkel 43', what: 'Appeltaart the height of a hat, with a slab of cream on the side. Sit outside on the square if there is a seat, which there will not be.', where: 'Noordermarkt, in the Jordaan' },
-    { name: 'Lanskroon', what: 'Stroopwafels the size of a saucer, with the syrup still going. The one on my head came from an airport; this is the proper article.', where: 'Singel, by the Bloemenmarkt' },
+    { name: 'Lanskroon', what: 'Stroopwafels the size of a saucer, with the syrup still going. The proper article, not the packet kind.', where: 'Singel, by the Bloemenmarkt' },
     { name: 'Van der Linde', what: 'Ice cream that is more cream than ice. One flavour, basically. They have been doing it since before the war and see no reason to stop.', where: 'Nieuwendijk, near the station' },
     { name: "Rudi's Original", what: 'A stroopwafel stall at the market, made while you stand there. Warm. Eat it before it goes flat.', where: 'Albert Cuypmarkt, in De Pijp' },
     { name: 'Holtkamp', what: 'A proper old pâtisserie. Tompouce — the pink one with the custard. Get the tompouce.', where: 'Vijzelgracht' },
@@ -408,7 +413,7 @@ const Voice = (() => {
     "Bees can't fly in the rain properly. Which is why I'm from Manchester and have never been anywhere. Until this month.",
     "A bee flies about twenty-two kilometres an hour with a following wind. I've now got the following wind to prove it.",
     "Six weeks, a working bee gets. I've spent one of mine in France and one going to Holland. Do the sums on the rest.",
-    "I taste with my feet. I've stood on a stroopwafel. Nothing further.",
+    "I taste with my feet. Don't dwell on that next time I land on your stroopwafel.",
     "We dance to say where the good stuff is. I'm going to need a very long dance when I get home.",
   ];
 
@@ -426,6 +431,6 @@ const Voice = (() => {
       .replace(/\{wind\}/g, ctx.wind || 'wherever it likes.');
   }
 
-  return { cards, royalMail, legs, general, remembering, hours, facts, wearing, treats, treatAsks, treatAgain, fill };
+  return { cards, royalMail, legs, general, inHolland, remembering, hours, facts, wearing, treats, treatAsks, treatAgain, fill };
 })();
 if (typeof module !== 'undefined') module.exports = Voice;
