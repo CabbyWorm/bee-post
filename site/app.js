@@ -104,7 +104,9 @@
     } else {
       drawAmsterdam(SHEETS.city);
       label('centraal', 'start', 'Centraal'); label('ijFerry', 'start', 'the ferry'); label('hotelDoor', 'start', 'your door');
-      label('bloemenmarkt', 'start', 'Bloemenmarkt'); label('vondelpark', 'end', 'Vondelpark'); label('beeHotel', 'end', 'bee hotel');
+      label('bloemenmarkt', 'start', 'Bloemenmarkt'); label('vondelpark', 'end', 'Vondelpark');
+      // The hotel goes on the map once it has slept in it; before that it is a spoiler.
+      if (now() >= Trip.T('2026-09-17T18:15:00Z')) label('beeHotel', 'end', 'bee hotel');
     }
     // The bee marker is a small rendering of the bee itself.
     layers.beeImg = el('image', { width: 46, height: 50, x: -23, y: -25 }, layers.bee);
