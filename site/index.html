@@ -59,6 +59,11 @@
   @keyframes say { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
   #bee { width: 268px; height: 296px; display: block; cursor: pointer; }
   .where { margin-top: 2px; text-align: center; }
+  button.ask { font-family: var(--hand); font-size: 21px; background: rgba(245,189,51,0.85); color: var(--ink); border: 1px solid rgba(222,145,28,0.55); padding: 10px 22px; box-shadow: 0 2px 3px rgba(0,0,0,0.12); }
+  .treat { margin: 16px 8px 0; width: calc(100% - 16px); background: rgba(255,255,255,0.7); border: 1px solid rgba(107,99,90,0.3); border-radius: 6px; padding: 14px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); animation: say .25s ease-out; }
+  .treat b { font-family: var(--hand); font-weight: normal; font-size: 26px; display: block; }
+  .treat p { margin: 4px 0 6px; font-size: 16px; }
+  .treat .typed { display: block; }
   .zzz { font-family: var(--hand); font-size: 22px; color: var(--faded); margin-top: -40px; margin-left: 150px; animation: drift 3s ease-in-out infinite; }
   @keyframes drift { 0% { opacity: .2; transform: translateY(6px); } 50% { opacity: 1; } 100% { opacity: .2; transform: translateY(-8px); } }
 
@@ -139,6 +144,8 @@
     <canvas id="bag" class="hidden" width="268" height="200" style="width:268px;height:200px;margin:48px 0" aria-label="A bag, zipped, with two antennae poking out of it"></canvas>
     <div id="zzz" class="hidden zzz">z z z</div>
     <div class="where typed" id="where"></div>
+    <p style="margin:20px 0 0"><button id="ask" class="ask" type="button">✦ Something sweet?</button></p>
+    <div id="treat" class="treat hidden"></div>
   </section>
 
   <section class="tracker">

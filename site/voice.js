@@ -342,6 +342,37 @@ const Voice = (() => {
     "Foucault's pendulum in Paris swung all day proving the earth turns. The ferry here goes back and forth all day proving nothing, and it's free, and I prefer it.",
   ];
 
+  /// Where the sugar is. Bundled, like Carnet's Treats.json, and in the order
+  /// the bee would tackle them. Real places; the bee has been over the lot.
+  const treats = [
+    { name: 'Van Stapele', what: 'One biscuit. Just the one kind. Dark chocolate outside, white chocolate still runny inside. There is a queue and the queue is correct.', where: 'Heisteeg, off the Spui' },
+    { name: 'Winkel 43', what: 'Appeltaart the height of a hat, with a slab of cream on the side. Sit outside on the square if there is a seat, which there will not be.', where: 'Noordermarkt, in the Jordaan' },
+    { name: 'Lanskroon', what: 'Stroopwafels the size of a saucer, with the syrup still going. The one on my head came from an airport; this is the proper article.', where: 'Singel, by the Bloemenmarkt' },
+    { name: 'Van der Linde', what: 'Ice cream that is more cream than ice. One flavour, basically. They have been doing it since before the war and see no reason to stop.', where: 'Nieuwendijk, near the station' },
+    { name: "Rudi's Original", what: 'A stroopwafel stall at the market, made while you stand there. Warm. Eat it before it goes flat.', where: 'Albert Cuypmarkt, in De Pijp' },
+    { name: 'Holtkamp', what: 'A proper old pâtisserie. Tompouce — the pink one with the custard. Get the tompouce.', where: 'Vijzelgracht' },
+    { name: 'De Laatste Kruimel', what: 'Cakes in a room the size of a cupboard, with the canal out the back window. Any of them. All of them, given time.', where: 'Langebrugsteeg, near the Rokin' },
+    { name: 'Monte Pelmo', what: 'Ice cream in the Jordaan, Italian, and a queue of locals who know. Pistachio. Trust me.', where: 'Tweede Anjeliersdwarsstraat' },
+    { name: 'Pluk', what: 'Cakes in colours flowers would be jealous of. Upstairs is quieter.', where: 'Reestraat, in the Nine Streets' },
+    { name: 'Metropolitan', what: 'Chocolate. A whole shop of it, and a coffee. Near the station, for a last one before a train.', where: 'Warmoesstraat' },
+  ];
+
+  /// The bee, asked for one thing. `{treat}` is the name of the place.
+  const treatAsks = [
+    "Ooh, now — {treat}.",
+    "{treat}. Go on, now, ideally.",
+    "I know exactly where to send you for that. {treat}.",
+    "Easy one. {treat}.",
+    "Right, {treat}. Been waiting for you to ask.",
+    "{treat}! That's the one. That's exactly the one I'd have.",
+    "{treat}, and I don't want to hear a word about walking straight past it.",
+    "{treat}. Thought about this a good deal more than you have, I'd wager.",
+  ];
+  const treatAgain = [
+    "That's the lot I know. Round again? I would.",
+    "Told you every single one now. Back to the top we go.",
+  ];
+
   /// The first time each new thing is seen on it, said once. See `BeeLook` in
   /// Carnet: a souvenir is an event, and it gets a line.
   const wearing = {
@@ -395,6 +426,6 @@ const Voice = (() => {
       .replace(/\{wind\}/g, ctx.wind || 'wherever it likes.');
   }
 
-  return { cards, royalMail, legs, general, remembering, hours, facts, wearing, fill };
+  return { cards, royalMail, legs, general, remembering, hours, facts, wearing, treats, treatAsks, treatAgain, fill };
 })();
 if (typeof module !== 'undefined') module.exports = Voice;

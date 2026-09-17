@@ -235,6 +235,7 @@
 
   function sayTheNextThing() {
     if (!current) return;
+    putDownTheTreat();
     buzz();
     const deck = deckFor(current);
     if (!deck.lines.length) return;
@@ -434,6 +435,23 @@
   });
   $('close').addEventListener('click', () => { $('overlay').classList.add('hidden'); document.body.classList.remove('locked'); openId = null; if (location.hash) history.replaceState(null, '', location.pathname + location.search); });
   $('overlay').addEventListener('click', (e) => { if (e.target === $('overlay')) $('close').click(); });
+
+  // MARK: - Something sweet
+
+  // Deliberately one button and one answer. Asking again walks the list; a
+  // tap on the bee puts it back on its own train of thought and takes the
+  // card with it, because otherwise there is no way to put it down.
+  let asked = store.get('asked', 0);
+  $('ask').addEventListener('click', () => {
+    const n = asked % Voice.treats.length, t = Voice.treats[n];
+    const line = asked > 0 && n === 0 ? Voice.treatAgain[asked % Voice.treatAgain.length] : Voice.treatAsks[asked % Voice.treatAsks.length].replace('{treat}', t.name);
+    asked++; store.set('asked', asked);
+    buzz(); say(line);
+    const card = $('treat'); card.replaceChildren(h('b', {}, t.name), h('p', {}, t.what), h('span', { class: 'typed' }, t.where));
+    card.classList.remove('hidden');
+    $('ask').textContent = '✦ Somewhere else?';
+  });
+  const putDownTheTreat = () => { $('treat').classList.add('hidden'); $('ask').textContent = '✦ Something sweet?'; };
 
   // MARK: - Keeping them
 
