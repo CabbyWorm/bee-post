@@ -19,7 +19,11 @@ on:
         required: false
         default: 'test'
 permissions:
-  contents: read
+  contents: write
+# One at a time, so two runs cannot both find a card unsent.
+concurrency:
+  group: buzz
+  cancel-in-progress: false
 jobs:
   buzz:
     runs-on: ubuntu-latest
@@ -36,3 +40,12 @@ jobs:
           CARD: ${{ inputs.card }}
           TEXT: ${{ inputs.text }}
           TO: ${{ inputs.to }}
+      # Remember what went, so it never goes twice.
+      - run: |
+          if [ -n "$(git status --porcelain sent)" ]; then
+            git config user.name "bee-post[bot]"
+            git config user.email "bee-post@users.noreply.github.com"
+            git add sent
+            git commit -q -m "Sent: $(ls sent | tr '\n' ' ')"
+            git pull --rebase -q && git push -q
+          fi

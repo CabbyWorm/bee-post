@@ -39,12 +39,18 @@ if (process.env.TEXT) {
 }
 console.log(`${due.length} due at ${new Date(now).toISOString()}: ${due.map((c) => c.id).join(', ') || '-'}`);
 
+// A card goes once. The marker is committed back by the workflow, so a
+// late cron and an on-time one — or two of anything — cannot both knock.
+fs.mkdirSync('sent', { recursive: true });
 for (const c of due) {
+  const marker = `sent/${c.id}`;
+  if (!to && !process.env.TEXT && fs.existsSync(marker)) { console.log(`already sent ${c.id}`); continue; }
   const payload = JSON.stringify({ title: c.title, body: c.body, tag: 'card-' + c.id, url: './#' + c.id });
   for (const s of subs) {
     try {
       await webpush.sendNotification(s, payload, { TTL: 60 * 60, urgency: 'high' });
       console.log(`sent ${c.id} -> ${s.label || 'post'} ${s.endpoint.slice(0, 40)}…`);
+      if (!to && !process.env.TEXT) fs.writeFileSync(marker, new Date().toISOString() + '\n');
     } catch (err) {
       console.log(`failed ${c.id} -> ${s.endpoint.slice(0, 40)}…: ${err.statusCode || ''} ${err.body || err.message}`);
       if (err.statusCode === 410 || err.statusCode === 404) console.log('  (subscription gone; it needs re-subscribing)');
