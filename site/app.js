@@ -293,7 +293,7 @@
   const dayOf = (t) => Trip.fmtDay(t).slice(0, 3);
   function updateTracker(state) {
     const leg = state.leg;
-    $('leg').textContent = leg.label;
+    $('leg').textContent = state.waiting ? `Waiting at ${Trip.places[leg.to].name}` : leg.label;
     $('mode').textContent = { wing: 'own wings', plane: 'by air', train: 'by rail', eurostar: 'by rail, under the sea', walk: 'on foot', wander: 'about town', sleep: 'asleep', wait: 'waiting', home: 'at home', bag: 'in the bag' }[leg.mode] || '';
     $('bar').style.width = (state.f * 100).toFixed(1) + '%';
     const sameDay = dayOf(leg.t0) === dayOf(leg.t1);

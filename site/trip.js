@@ -125,13 +125,13 @@ const Trip = (() => {
       from: 'hotelDoor', to: 'gate', departs: '2026-09-19T10:30:00Z', arrives: '2026-09-19T11:10:00Z',
       via: ['hotelDoor', 'centraal', 'gate'], weary: [0.18, 0.18], plump: [0.76, 0.76] },
     { id: 'sat-gate', mode: 'bag', label: 'In the bag, at the gate',
-      from: 'gate', to: 'gate', departs: '2026-09-19T11:10:00Z', arrives: '2026-09-19T13:10:00Z',
+      from: 'gate', to: 'gate', departs: '2026-09-19T11:10:00Z', arrives: '2026-09-19T12:50:00Z',
       via: ['gate'], weary: [0.2, 0.15], plump: [0.76, 0.78] },
     { id: 'ezy2166', mode: 'plane', label: 'EZY2166, Amsterdam to Manchester', inTheBag: true,
-      from: 'gate', to: 'manAirport', departs: '2026-09-19T13:10:00Z', arrives: '2026-09-19T14:30:00Z',
+      from: 'gate', to: 'manAirport', departs: '2026-09-19T12:50:00Z', arrives: '2026-09-19T14:10:00Z',
       via: ['gate', 'manAirport'], weary: [0.15, 0.12], plump: [0.78, 0.78] },
     { id: 'home', mode: 'home', label: 'Back in the hedge',
-      from: 'manAirport', to: 'hive', departs: '2026-09-19T14:30:00Z', arrives: '2026-12-31T00:00:00Z',
+      from: 'manAirport', to: 'hive', departs: '2026-09-19T14:10:00Z', arrives: '2026-12-31T00:00:00Z',
       via: ['manAirport', 'hive'], at: [0, 0.002], weary: [0.12, 0.05], plump: [0.78, 0.80] },
   ].map((l) => ({ ...l, t0: T(l.departs), t1: T(l.arrives) }));
 
@@ -155,7 +155,7 @@ const Trip = (() => {
       title: 'Post.', body: 'Delivered. It came under the sea. In a train.' },
     { id: '05', deliveredAt: '2026-09-19T07:30:00Z', by: 'sat-deliver', where: 'hotelDoor',
       title: 'Post.', body: 'One more. Hand delivered — it never went home.' },
-    { id: '06', deliveredAt: '2026-09-19T12:30:00Z', by: 'sat-gate', where: 'gate',
+    { id: '06', deliveredAt: '2026-09-19T12:05:00Z', by: 'sat-gate', where: 'gate',
       title: 'Post.', body: 'Last one. Don\'t check the bag.' },
   ].map((c) => ({ ...c, t: T(c.deliveredAt), tBuzz: T(c.buzzAt || c.deliveredAt) }));
 
@@ -213,8 +213,16 @@ const Trip = (() => {
 
   /// Everything about the bee at instant `now`.
   function state(now) {
-    let leg = legs.find((l) => now >= l.t0 && now < l.t1) || (now < legs[0].t0 ? legs[0] : legs[legs.length - 1]);
-    const f = clamp01((now - leg.t0) / (leg.t1 - leg.t0));
+    // Between legs — off a plane, not yet on the train — it waits where it
+    // landed rather than falling through to the last leg of all, which is
+    // home, and had it in the hedge for ten minutes at a time.
+    let leg = legs.find((l) => now >= l.t0 && now < l.t1);
+    let waiting = false;
+    if (!leg) {
+      if (now < legs[0].t0) leg = legs[0];
+      else { leg = [...legs].reverse().find((l) => now >= l.t1) || legs[legs.length - 1]; waiting = leg.t1 <= now && leg !== legs[legs.length - 1]; }
+    }
+    const f = waiting ? 1 : clamp01((now - leg.t0) / (leg.t1 - leg.t0));
     const pos = positionOn(leg, f);
     const souvenir = souvenirs.filter((s) => now >= s.t).pop()?.souvenir || null;
     // The sun it caught in Provence, going off it slowly. Manchester is not helping.
@@ -225,7 +233,7 @@ const Trip = (() => {
     const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Europe/Amsterdam' }).format(new Date(now)));
     const mood = leg.mode === 'sleep' ? 'sleepy' : justDelivered ? 'delighted' : (hour >= 23 || hour < 6) ? 'sleepy' : 'cheerful';
     const fromHome = haversine(places.manchester, pos);
-    return { now, leg, f, pos, look, mood, delivered, justDelivered, fromHome,
+    return { now, leg, f, pos, look, mood, delivered, justDelivered, fromHome, waiting,
       next: legs[legs.indexOf(leg) + 1] || null, done: now >= legs[legs.length - 1].t0 };
   }
 

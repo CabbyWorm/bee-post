@@ -132,7 +132,7 @@ const Voice = (() => {
       caption: 'DON\'T CHECK',
       text: [
         "I'm in the bag. Don't check. Just know.",
-        "The 15:10, back to Manchester. It'll be raining when we land — I've not checked and I don't need to — and I'm still going to be glad. I've been to France and I've been to Holland and I've been to London for about ten minutes, and there's about six weeks in a bee altogether, and one of them's gone on this, and I'd do it again tomorrow if there was a flight.",
+        "The ten to three, back to Manchester. It'll be raining when we land — I've not checked and I don't need to — and I'm still going to be glad. I've been to France and I've been to Holland and I've been to London for about ten minutes, and there's about six weeks in a bee altogether, and one of them's gone on this, and I'd do it again tomorrow if there was a flight.",
         "Thanks for going somewhere. I needed somewhere to send these.",
         "See you at the other end. Don't tell Andy about the ferry before I do.",
       ],
@@ -291,7 +291,7 @@ const Voice = (() => {
     ],
     'sat-gate': [
       "In the bag. At the gate. Not moving, not buzzing.",
-      "EZY2166. 15:10. Back to Manchester. It'll be raining. It doesn't matter.",
+      "EZY2166. Ten to three. Back to Manchester. It'll be raining. It doesn't matter.",
       "About six weeks in a bee, all in. I've had one of them in a bag. Wouldn't have it back.",
     ],
     'ezy2166': [
